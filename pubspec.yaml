@@ -191,6 +191,7 @@ flutter:
     - COPYING
     - NOTICE
     - assets/images/
+    - assets/gothic/
     - assets/fonts/Inter-LICENSE.txt
     - assets/fonts/GoogleSansFlex-LICENSE.txt
     - assets/fonts/Cinzel-OFL.txt

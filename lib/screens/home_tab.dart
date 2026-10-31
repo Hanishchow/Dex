@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:mornye/widgets/app_snack_bar.dart';
 import 'package:mornye/screens/track_history_snapshot.dart';
 import 'package:mornye/widgets/dex/dex_empty_state.dart';
+import 'package:mornye/widgets/dex/dex_ornament.dart';
 import 'package:mornye/widgets/dex/dex_pressable.dart';
 import 'package:mornye/widgets/dex_ascii_backdrop.dart' show DexAmbient;
 import 'package:mornye/theme/app_tokens.dart';
@@ -954,67 +955,88 @@ class _HomeTabState extends ConsumerState<HomeTab>
       },
       behavior: HitTestBehavior.translucent,
       child: Scaffold(
-        body: AppRefreshIndicator(
-          onRefresh: () => ref.read(exploreProvider.notifier).refresh(),
-          notificationPredicate: (notification) => showExplore,
-          child: CustomScrollView(
-            controller: _homeScrollController,
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            slivers: [
-              if (searchToolbar)
-                _buildDesktopSearchToolbarSliver()
-              else
-                _buildHeaderSliver(greeting: greeting),
-              if (_showsHome) const SliverToBoxAdapter(child: AppCrashBanner()),
-              _buildHomeIntroSliver(
-                sectionMotion: sectionMotion,
-                hasResults: hasResults,
-                showExplore: showFeedSurface,
-                colorScheme: colorScheme,
-                screenHeight: screenHeight,
-                showEmptyHomeState: showEmptyHomeState,
+        body: Stack(
+          children: [
+            AppRefreshIndicator(
+              onRefresh: () => ref.read(exploreProvider.notifier).refresh(),
+              notificationPredicate: (notification) => showExplore,
+              child: CustomScrollView(
+                controller: _homeScrollController,
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                slivers: [
+                  if (searchToolbar)
+                    _buildDesktopSearchToolbarSliver()
+                  else
+                    _buildHeaderSliver(greeting: greeting),
+                  if (_showsHome)
+                    const SliverToBoxAdapter(child: AppCrashBanner()),
+                  _buildHomeIntroSliver(
+                    sectionMotion: sectionMotion,
+                    hasResults: hasResults,
+                    showExplore: showFeedSurface,
+                    colorScheme: colorScheme,
+                    screenHeight: screenHeight,
+                    showEmptyHomeState: showEmptyHomeState,
+                  ),
+                  if (showSearchBar && !searchToolbar)
+                    _buildSearchBarSliver(
+                      hasResults: hasResults,
+                      showExplore: showFeedSurface,
+                      greetsInHeader: greetsInHeader,
+                    ),
+                  if (hasActiveSearchSurface &&
+                      !showRecentAccess &&
+                      !showEmptySearchResult &&
+                      !showLibraryResults)
+                    _buildSearchFilterSliver(
+                      colorScheme: colorScheme,
+                      defaultSearchTab: defaultSearchTab,
+                    ),
+                  if (showRecentAccess &&
+                      !showLibraryResults &&
+                      !showLibraryPrompt)
+                    _buildRecentAccessSliver(colorScheme: colorScheme),
+                  if (showLibraryResults) _buildLibrarySearchSliver(),
+                  if (showLibraryPrompt) _buildLibraryPromptSliver(),
+                  if (searchToolbar &&
+                      !hasSearchInput &&
+                      !_searchingLibrary &&
+                      !homeFeedDisabled)
+                    _buildBrowseSliver(),
+                  _buildHomeSectionsSliver(
+                    sectionMotion: sectionMotion,
+                    hasResults: hasResults,
+                    showRecentAccess: showRecentAccess,
+                    showExplore: showFeedSurface,
+                    showEmptyHomeState: showEmptyHomeState,
+                  ),
+                  if (showExplore)
+                    _buildExploreSliver(colorScheme: colorScheme),
+                  if (showExploreLoading) _buildExploreLoadingSliver(),
+                  if (_showsSearch && !showLibraryResults)
+                    _buildSearchResultsSliver(
+                      colorScheme: colorScheme,
+                      hasActiveSearchSurface: hasActiveSearchSurface,
+                      showEmptySearchResult: showEmptySearchResult,
+                    ),
+                  const NavBarSliverSpacer(),
+                ],
               ),
-              if (showSearchBar && !searchToolbar)
-                _buildSearchBarSliver(
-                  hasResults: hasResults,
-                  showExplore: showFeedSurface,
-                  greetsInHeader: greetsInHeader,
-                ),
-              if (hasActiveSearchSurface &&
-                  !showRecentAccess &&
-                  !showEmptySearchResult &&
-                  !showLibraryResults)
-                _buildSearchFilterSliver(
-                  colorScheme: colorScheme,
-                  defaultSearchTab: defaultSearchTab,
-                ),
-              if (showRecentAccess && !showLibraryResults && !showLibraryPrompt)
-                _buildRecentAccessSliver(colorScheme: colorScheme),
-              if (showLibraryResults) _buildLibrarySearchSliver(),
-              if (showLibraryPrompt) _buildLibraryPromptSliver(),
-              if (searchToolbar &&
-                  !hasSearchInput &&
-                  !_searchingLibrary &&
-                  !homeFeedDisabled)
-                _buildBrowseSliver(),
-              _buildHomeSectionsSliver(
-                sectionMotion: sectionMotion,
-                hasResults: hasResults,
-                showRecentAccess: showRecentAccess,
-                showExplore: showFeedSurface,
-                showEmptyHomeState: showEmptyHomeState,
+            ),
+            // Gothic hero artwork, behind nothing: a faint overlay at the
+            // top-right of Home.
+            const Positioned(
+              top: 0,
+              right: 0,
+              child: DexOrnament(
+                DexArtwork.lilyChandelier,
+                width: 360,
+                opacity: 0.16,
+                alignment: Alignment.topRight,
               ),
-              if (showExplore) _buildExploreSliver(colorScheme: colorScheme),
-              if (showExploreLoading) _buildExploreLoadingSliver(),
-              if (_showsSearch && !showLibraryResults)
-                _buildSearchResultsSliver(
-                  colorScheme: colorScheme,
-                  hasActiveSearchSurface: hasActiveSearchSurface,
-                  showEmptySearchResult: showEmptySearchResult,
-                ),
-              const NavBarSliverSpacer(),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

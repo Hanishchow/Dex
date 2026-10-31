@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mornye/theme/app_tokens.dart';
 import 'package:mornye/theme/mornye_theme.dart';
+import 'package:mornye/widgets/dex/dex_ornament.dart';
 import 'package:mornye/widgets/app_icon.dart';
 import 'package:mornye/widgets/app_icon_button.dart';
 import 'package:mornye/utils/adaptive_layout.dart';
@@ -119,77 +120,99 @@ class AppSliverHeader extends StatelessWidget {
           : null,
       actionsPadding: EdgeInsetsDirectional.only(end: edgeInset),
       actions: actions,
-      flexibleSpace: LayoutBuilder(
-        builder: (context, constraints) {
-          // SliverAppBar adds the platform's actual top safe-area inset to its
-          // extents. Deriving the collapse ratio from our requested heights
-          // left notched iPhones looking almost fully expanded even after the
-          // toolbar had collapsed, so the large title occupied the back
-          // button's space. Read the resolved sliver geometry instead.
-          final settings = context
-              .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
-          final minExtent = settings?.minExtent ?? kToolbarHeight;
-          final maxExtent = settings?.maxExtent ?? maxHeight;
-          final currentExtent =
-              settings?.currentExtent ?? constraints.maxHeight;
-          final extentDelta = maxExtent - minExtent;
-          final expandRatio = extentDelta > 0
-              ? ((currentExtent - minExtent) / extentDelta).clamp(0.0, 1.0)
-              : 0.0;
-          final contentMargin =
-              _contentMargin + (alignToContent ? wideListInset(context) : 0);
-          // On desktop the expanded header is short, so the title shares a row
-          // with the back button; keep it clear of the button at every size.
-          final leftPadding = showLeading
-              ? (isDesktopPlatform
-                    ? _leadingClearance + edgeInset
-                    : (_leadingClearance + edgeInset) -
-                          (((_leadingClearance + edgeInset) - contentMargin) *
-                              expandRatio))
-              : contentMargin;
-          final fontSize =
-              tokens.headerCollapsedTitleSize +
-              (tokens.headerExpandedTitleSize -
-                      tokens.headerCollapsedTitleSize) *
-                  expandRatio;
+      flexibleSpace: Stack(
+        fit: StackFit.expand,
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // SliverAppBar adds the platform's actual top safe-area inset to its
+              // extents. Deriving the collapse ratio from our requested heights
+              // left notched iPhones looking almost fully expanded even after the
+              // toolbar had collapsed, so the large title occupied the back
+              // button's space. Read the resolved sliver geometry instead.
+              final settings = context
+                  .dependOnInheritedWidgetOfExactType<
+                    FlexibleSpaceBarSettings
+                  >();
+              final minExtent = settings?.minExtent ?? kToolbarHeight;
+              final maxExtent = settings?.maxExtent ?? maxHeight;
+              final currentExtent =
+                  settings?.currentExtent ?? constraints.maxHeight;
+              final extentDelta = maxExtent - minExtent;
+              final expandRatio = extentDelta > 0
+                  ? ((currentExtent - minExtent) / extentDelta).clamp(0.0, 1.0)
+                  : 0.0;
+              final contentMargin =
+                  _contentMargin +
+                  (alignToContent ? wideListInset(context) : 0);
+              // On desktop the expanded header is short, so the title shares a row
+              // with the back button; keep it clear of the button at every size.
+              final leftPadding = showLeading
+                  ? (isDesktopPlatform
+                        ? _leadingClearance + edgeInset
+                        : (_leadingClearance + edgeInset) -
+                              (((_leadingClearance + edgeInset) -
+                                      contentMargin) *
+                                  expandRatio))
+                  : contentMargin;
+              final fontSize =
+                  tokens.headerCollapsedTitleSize +
+                  (tokens.headerExpandedTitleSize -
+                          tokens.headerCollapsedTitleSize) *
+                      expandRatio;
 
-          final bar = FlexibleSpaceBar(
-            centerTitle: false,
-            expandedTitleScale: 1.0,
-            titlePadding: EdgeInsetsDirectional.only(
-              start: leftPadding,
-              end: tokens.gapLg,
-              bottom: tokens.gapLg,
-            ),
-            title: Semantics(
-              header: true,
-              child: Text(
-                title,
-                // The title grows as the header expands; without a cap a long
-                // localized title overflowed instead of ellipsizing.
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: context.isMornye ? -0.7 * expandRatio : null,
-                  color: colorScheme.onSurface,
+              final bar = FlexibleSpaceBar(
+                centerTitle: false,
+                expandedTitleScale: 1.0,
+                titlePadding: EdgeInsetsDirectional.only(
+                  start: leftPadding,
+                  end: tokens.gapLg,
+                  bottom: tokens.gapLg,
                 ),
-              ),
+                title: Semantics(
+                  header: true,
+                  child: Text(
+                    title,
+                    // The title grows as the header expands; without a cap a long
+                    // localized title overflowed instead of ellipsizing.
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: context.isMornye
+                          ? -0.7 * expandRatio
+                          : null,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              );
+              if (context.isMornye) return bar;
+              // Collapsed expressive bars sit on a container tone, like a
+              // scrolled-under app bar, and fade back to the surface on expand.
+              return ColoredBox(
+                color: Color.lerp(
+                  colorScheme.surfaceContainer,
+                  colorScheme.surface,
+                  expandRatio,
+                )!,
+                child: bar,
+              );
+            },
+          ),
+          // Gothic filigree hanging in the top-right corner of every header.
+          const Positioned(
+            top: 0,
+            right: 0,
+            child: DexOrnament(
+              DexArtwork.cornerFiligree,
+              width: 300,
+              opacity: 0.2,
+              alignment: Alignment.topRight,
             ),
-          );
-          if (context.isMornye) return bar;
-          // Collapsed expressive bars sit on a container tone, like a
-          // scrolled-under app bar, and fade back to the surface on expand.
-          return ColoredBox(
-            color: Color.lerp(
-              colorScheme.surfaceContainer,
-              colorScheme.surface,
-              expandRatio,
-            )!,
-            child: bar,
-          );
-        },
+          ),
+        ],
       ),
     );
   }

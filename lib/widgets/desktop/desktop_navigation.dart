@@ -10,6 +10,7 @@ import 'package:mornye/services/shell_navigation_service.dart';
 import 'package:mornye/services/user_profile_store.dart';
 import 'package:mornye/theme/app_motion.dart';
 import 'package:mornye/theme/dex_gothic.dart';
+import 'package:mornye/widgets/dex/dex_ornament.dart';
 import 'package:mornye/theme/material_expressive.dart';
 import 'package:mornye/theme/mornye_theme.dart';
 import 'package:mornye/widgets/app_icon.dart';
@@ -561,28 +562,42 @@ class DesktopNavigationRail extends StatelessWidget {
               expansion,
             ),
             child: ClipRect(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Stack(
                 children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Column(
-                        children: [
-                          for (final (index, destination)
-                              in primary.indexed) ...[
-                            if (index > 0) SizedBox(height: gap),
-                            item(destination),
-                          ],
-                        ],
+                  // A tall sword behind the destinations, very faint.
+                  const Positioned.fill(
+                    child: Center(
+                      child: DexOrnament(
+                        DexArtwork.sword,
+                        height: 380,
+                        opacity: 0.16,
                       ),
                     ),
                   ),
-                  if (settings != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: item(settings),
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Column(
+                            children: [
+                              for (final (index, destination)
+                                  in primary.indexed) ...[
+                                if (index > 0) SizedBox(height: gap),
+                                item(destination),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (settings != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: item(settings),
+                        ),
+                    ],
+                  ),
                 ],
               ),
             ),
