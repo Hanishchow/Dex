@@ -1,3 +1,26 @@
+# Dex
+
+Dex is a gothic, black-and-white desktop build of **Mornye**, by
+[zarzet](https://github.com/zarzet) (Zarz Eleutherius) and the Mornye
+contributors. It is a modified version of their work and stays under the same
+licence, **LGPL-3.0-only** (see `LICENSE`). The original project, its history
+and its full credits live at <https://github.com/mornyeapp/Mornye>.
+
+What Dex changes: the name and logo, a monochrome gothic theme with Cinzel and
+UnifrakturCook type, a desktop-first layout, an ASCII startup animation and
+background, and desktop interaction states. Everything else, including the Rust
+backend, the extension system and the download pipeline, is Mornye's work. The
+About page inside the app lists the contributors, translators and services Dex
+depends on.
+
+Dex is a separate project and is not affiliated with or endorsed by the Mornye
+maintainers. Please report Dex problems here, not to the original project.
+
+---
+
+*The text below is the original Mornye README, kept for reference.*
+
+---
 <div align="center">
 
 <picture>

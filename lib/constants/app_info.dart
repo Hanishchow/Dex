@@ -25,9 +25,9 @@ class AppInfo {
 
   static const String mobileAuthor = 'zarzet';
 
-  /// Dex's own repository as "owner/name". Empty until it is published; while
-  /// empty, Dex shows no issue links and does not check for updates.
-  static const String dexRepo = '';
+  /// Dex's own repository as "owner/name". While empty, Dex shows no issue
+  /// links and does not check for updates.
+  static const String dexRepo = 'Hanishchow/Dex';
   static bool get hasRepo => dexRepo.isNotEmpty;
 
   /// The project Dex is built on. Kept for credit and licence reasons: Dex is
