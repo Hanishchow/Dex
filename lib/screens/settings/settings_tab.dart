@@ -1048,7 +1048,7 @@ class _CategoryRow extends StatelessWidget {
   }
 }
 
-/// A category glyph: Material's plain icon, or Mornye's white symbol on a
+/// A category glyph: Material's plain icon, or Dex's white symbol on a
 /// tile in the category's color, as in System Settings.
 class _CategoryIcon extends StatelessWidget {
   const _CategoryIcon({

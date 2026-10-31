@@ -18,7 +18,7 @@ class AppInfo {
     return desktop ?? isDesktopPlatform ? '$version (beta)' : version;
   }
 
-  static const String appName = 'Mornye';
+  static const String appName = 'Dex';
   static const String license = 'LGPL-3.0-only';
   static const String copyright = '© 2026 Zarz Eleutherius';
 

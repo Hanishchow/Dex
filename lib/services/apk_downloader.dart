@@ -48,7 +48,7 @@ class ApkDownloader {
 
       final safeVersion = version.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
       final finalFile = File(
-        '${dir.path}${Platform.pathSeparator}Mornye-$safeVersion.apk',
+        '${dir.path}${Platform.pathSeparator}Dex-$safeVersion.apk',
       );
       final partFile = File('${finalFile.path}.part');
       final metadataFile = File('${partFile.path}.json');

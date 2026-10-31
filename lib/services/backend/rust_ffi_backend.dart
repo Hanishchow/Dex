@@ -223,7 +223,7 @@ class RustFfiBackend extends BackendChannel {
     } on Object catch (error) {
       throw PlatformException(
         code: desktopBackendUnavailableCode,
-        message: 'The Mornye desktop backend library could not be loaded',
+        message: 'The Dex desktop backend library could not be loaded',
         details: error.toString(),
       );
     }

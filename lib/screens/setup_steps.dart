@@ -45,7 +45,7 @@ extension _SetupScreenSteps on _SetupScreenState {
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minHeight: minContentHeight,
-                maxWidth: 560,
+                maxWidth: 920,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -62,6 +62,7 @@ extension _SetupScreenSteps on _SetupScreenState {
                     context.l10n.appName,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      fontFamily: 'UnifrakturCook',
                       fontWeight: FontWeight.bold,
                       color: colorScheme.onSurface,
                       fontSize:
@@ -133,6 +134,7 @@ extension _SetupScreenSteps on _SetupScreenState {
                   Text(
                     context.l10n.setupLanguageTitle,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontFamily: 'UnifrakturCook',
                       fontWeight: FontWeight.bold,
                       color: colorScheme.onSurface,
                     ),
@@ -411,7 +413,7 @@ class _StepLayout extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minHeight: minContentHeight,
-                maxWidth: 560,
+                maxWidth: 920,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -432,6 +434,7 @@ class _StepLayout extends StatelessWidget {
                   Text(
                     title,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontFamily: 'UnifrakturCook',
                       fontWeight: FontWeight.bold,
                       color: colorScheme.onSurface,
                     ),

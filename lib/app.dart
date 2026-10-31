@@ -20,6 +20,8 @@ import 'package:mornye/utils/desktop_platform.dart';
 import 'package:mornye/widgets/app_snack_bar.dart';
 import 'package:mornye/widgets/desktop/desktop_shortcuts.dart';
 import 'package:mornye/widgets/desktop/library_drop_target.dart';
+import 'package:mornye/widgets/dex/dex_boot_splash.dart';
+import 'package:mornye/widgets/dex_ascii_backdrop.dart';
 import 'package:mornye/widgets/mornye_glass_preparation.dart';
 import 'package:mornye/widgets/playback_feedback.dart';
 
@@ -139,7 +141,7 @@ ScrollBehavior appScrollBehavior({required bool disableOverscrollEffects}) {
 }
 
 /// Fades the app content in after an orientation change or a width change
-/// across the shell's rail breakpoint (fold/unfold, split-screen resize) —
+/// across the shell's rail breakpoint (fold/unfold, split-screen resize) â€”
 /// Flutter reflows the layout in a single frame, so without this the new
 /// layout pops in.
 class _OrientationFade extends StatefulWidget {
@@ -266,7 +268,23 @@ class MornyeApp extends ConsumerWidget {
             return MediaQuery(
               data: mediaQuery.copyWith(displayFeatures: const []),
               child: MornyeGlassPreparation(
-                child: AdaptiveUiScaler(child: appContent),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    AdaptiveUiScaler(child: appContent),
+                    const Positioned.fill(
+                      child: IgnorePointer(child: DexAsciiBackdrop()),
+                    ),
+                    Positioned.fill(
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: dexBootFinished,
+                        builder: (context, done, _) => done
+                            ? const SizedBox.shrink()
+                            : const DexBootSplash(),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },

@@ -585,7 +585,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen>
 
   Future<String> _getDefaultDirectory() async {
     if (_platform == TargetPlatform.android) {
-      final downloadDir = Directory('/storage/emulated/0/Download/Mornye');
+      final downloadDir = Directory('/storage/emulated/0/Download/Dex');
       try {
         if (!await downloadDir.exists()) {
           await downloadDir.create(recursive: true);
@@ -596,7 +596,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen>
       }
     }
     final appDir = await getApplicationDocumentsDirectory();
-    return '${appDir.path}/Mornye';
+    return '${appDir.path}/Dex';
   }
 
   Future<void> _completeSetup() async {
@@ -847,7 +847,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen>
     if (_isDesktop) {
       content = Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
+          constraints: const BoxConstraints(maxWidth: 920),
           child: content,
         ),
       );

@@ -86,7 +86,7 @@ class CoverDownloadService {
       }
       if (outputDirectory.isEmpty) {
         final documents = await getApplicationDocumentsDirectory();
-        outputDirectory = p.join(documents.path, 'Mornye');
+        outputDirectory = p.join(documents.path, 'Dex');
       }
 
       final directory = Directory(outputDirectory);

@@ -244,7 +244,7 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
                     SizedBox(height: bottomGap),
                     Center(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 400),
+                        constraints: const BoxConstraints(maxWidth: 520),
                         child: SizedBox(
                           width: double.infinity,
                           height: actionButtonHeight,
@@ -291,7 +291,7 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
   Widget _desktopColumn(Widget child) => isDesktopPlatform
       ? Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
+            constraints: const BoxConstraints(maxWidth: 920),
             child: child,
           ),
         )
@@ -734,7 +734,7 @@ class _TutorialPage extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 560),
+                constraints: const BoxConstraints(maxWidth: 920),
                 child: Column(
                   children: [
                     SizedBox(height: topGap),

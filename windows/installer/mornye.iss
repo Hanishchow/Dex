@@ -34,7 +34,7 @@
 #endif
 
 #define AppName "Mornye"
-#define AppExe "mornye.exe"
+#define AppExe "dex.exe"
 #define AppUserModelId "com.zarz.mornye"
 #define AppUrl "https://github.com/mornyeapp/Mornye"
 

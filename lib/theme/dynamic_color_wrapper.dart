@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mornye/theme/dex_gothic.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:material_ui/material_ui.dart' as material_ui;
@@ -26,22 +27,22 @@ class DynamicColorWrapper extends ConsumerWidget {
       builder: (lightDynamic, darkDynamic) {
         if (themeSettings.style == AppThemeStyle.mornye) {
           return builder(
-            MornyeTheme.build(
+            applyDexGothic(MornyeTheme.build(
               Brightness.light,
               accent: themeSettings.mornyeAccent,
               useSystemFont: themeSettings.useSystemFont,
               fontFamily: fontFamily,
               glassClarity: themeSettings.mornyeGlassClarity,
               glassOutlines: themeSettings.mornyeGlassOutlines,
-            ),
-            MornyeTheme.build(
+            )),
+            applyDexGothic(MornyeTheme.build(
               Brightness.dark,
               accent: themeSettings.mornyeAccent,
               useSystemFont: themeSettings.useSystemFont,
               fontFamily: fontFamily,
               glassClarity: themeSettings.mornyeGlassClarity,
               glassOutlines: themeSettings.mornyeGlassOutlines,
-            ),
+            )),
             themeSettings.themeMode,
           );
         }
@@ -82,7 +83,11 @@ class DynamicColorWrapper extends ConsumerWidget {
           fontFamily: fontFamily,
         );
 
-        return builder(lightTheme, darkTheme, themeSettings.themeMode);
+        return builder(
+          applyDexGothic(lightTheme),
+          applyDexGothic(darkTheme),
+          themeSettings.themeMode,
+        );
       },
     );
   }

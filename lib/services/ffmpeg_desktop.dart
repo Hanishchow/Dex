@@ -19,7 +19,7 @@ class FFmpegUnavailableException implements Exception {
   final String tool;
 
   String get message =>
-      '$tool is not available. Reinstall Mornye, or set '
+      '$tool is not available. Reinstall Dex, or set '
       '${DesktopFFmpegTools.directoryVariable} to a folder that contains '
       'ffmpeg and ffprobe.';
 

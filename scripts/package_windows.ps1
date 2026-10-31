@@ -41,7 +41,7 @@ if ($upstream -notmatch '^(\d+)\.(\d+)\.(\d+)([.-][0-9A-Za-z.-]+)?$') {
 }
 $numericVersion = "$($Matches[1]).$($Matches[2]).$($Matches[3]).0"
 
-foreach ($required in 'mornye.exe', 'flutter_windows.dll', 'data\app.so') {
+foreach ($required in 'dex.exe', 'flutter_windows.dll', 'data\app.so') {
     if (-not (Test-Path (Join-Path $BundleDir $required))) {
         throw "Missing $required in $BundleDir"
     }
