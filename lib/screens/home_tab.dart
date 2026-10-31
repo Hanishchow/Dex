@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mornye/widgets/app_snack_bar.dart';
 import 'package:mornye/screens/track_history_snapshot.dart';
+import 'package:mornye/widgets/dex/dex_empty_state.dart';
+import 'package:mornye/widgets/dex_ascii_backdrop.dart' show DexAmbient;
 import 'package:mornye/theme/app_tokens.dart';
 import 'package:mornye/theme/cover_palette.dart';
 import 'package:mornye/theme/mornye_theme.dart';
@@ -205,6 +207,8 @@ class _HomeTabState extends ConsumerState<HomeTab>
     // Run an initial fetch check in case extensions were already initialized
     // before HomeTab was mounted (e.g. auto-installed during first setup).
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Home has rendered: calm the ambient background plate.
+      DexAmbient.settle();
       if (mounted) _fetchExploreIfNeeded();
     });
 
@@ -1380,37 +1384,9 @@ class _HomeTabState extends ConsumerState<HomeTab>
       final emptyHeight = (screenHeight - 220).clamp(280.0, 520.0).toDouble();
       return SizedBox(
         height: emptyHeight,
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.extension_outlined,
-                  size: 56,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  context.l10n.homeEmptyTitle,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  context.l10n.homeEmptySubtitle,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
+        child: DexEmptyState(
+          title: context.l10n.homeEmptyTitle,
+          message: context.l10n.homeEmptySubtitle,
         ),
       );
     }

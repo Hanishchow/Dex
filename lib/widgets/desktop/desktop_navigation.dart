@@ -9,6 +9,7 @@ import 'package:mornye/providers/user_profile_provider.dart';
 import 'package:mornye/services/shell_navigation_service.dart';
 import 'package:mornye/services/user_profile_store.dart';
 import 'package:mornye/theme/app_motion.dart';
+import 'package:mornye/theme/dex_gothic.dart';
 import 'package:mornye/theme/material_expressive.dart';
 import 'package:mornye/theme/mornye_theme.dart';
 import 'package:mornye/widgets/app_icon.dart';
@@ -546,8 +547,13 @@ class DesktopNavigationRail extends StatelessWidget {
           onTap: () => onSelected(destination.tab),
         );
         final gap = lerpDouble(4, desktopRailItemGap, expansion)!;
-        return ColoredBox(
-          color: background,
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: background,
+            border: Border(
+              right: BorderSide(color: colorScheme.outlineVariant),
+            ),
+          ),
           child: SizedBox(
             width: lerpDouble(
               desktopCollapsedRailWidth,
@@ -633,9 +639,13 @@ class _RailDestinationState extends State<_RailDestination> {
     const inset = _RailDestination._inset;
 
     final expandedStyle = textTheme.labelLarge!.copyWith(
+      fontFamily: dexHeadingFont,
+      letterSpacing: 0.8,
       fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
     );
     final collapsedStyle = textTheme.labelMedium!.copyWith(
+      fontFamily: dexHeadingFont,
+      letterSpacing: 0.4,
       fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
     );
     // The expanded pill hugs its label, so measure it.
@@ -664,8 +674,9 @@ class _RailDestinationState extends State<_RailDestination> {
     final collapsedLabel = (1 - t * 2).clamp(0.0, 1.0);
     final expandedLabel = (t * 2 - 1).clamp(0.0, 1.0);
 
+    // Dex: the selected destination is inverted (bone pill, ink icon).
     final foreground = selected
-        ? colorScheme.onSecondaryContainer
+        ? colorScheme.onPrimary
         : colorScheme.onSurfaceVariant;
     final stateOpacity = _pressed
         ? 0.1
@@ -701,7 +712,7 @@ class _RailDestinationState extends State<_RailDestination> {
                     heightFactor: 1,
                     child: DecoratedBox(
                       decoration: ShapeDecoration(
-                        color: colorScheme.secondaryContainer,
+                        color: colorScheme.primary,
                         shape: const StadiumBorder(),
                       ),
                     ),

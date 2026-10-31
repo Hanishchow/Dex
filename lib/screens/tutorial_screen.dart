@@ -728,6 +728,10 @@ class _TutorialPage extends StatelessWidget {
             ((56 * scale) + ((textScale - 1) * 10)) * heightScale;
         final bottomGap = (32 * scale).clamp(20.0, 32.0) * heightScale;
 
+        if (isDesktopPlatform && constraints.maxWidth >= 900) {
+          return _desktopLayout(context, isActive);
+        }
+
         return ScrollEdgeFade(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -798,6 +802,110 @@ class _TutorialPage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  static const _numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+
+  /// Wide windows: emblem, title and description on the left, the tips or
+  /// the interactive example on the right, so the page uses the window
+  /// instead of a narrow phone column.
+  Widget _desktopLayout(BuildContext context, bool isActive) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final numeral = index < _numerals.length
+        ? _numerals[index]
+        : '${index + 1}';
+    const fade = Duration(milliseconds: 260);
+
+    Widget frame(Widget child) => Container(
+      width: 132,
+      height: 132,
+      decoration: BoxDecoration(border: Border.all(color: colorScheme.outline)),
+      child: Container(
+        margin: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          border: Border.all(color: colorScheme.outlineVariant),
+        ),
+        child: Center(child: child),
+      ),
+    );
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1180),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 48),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                flex: 5,
+                child: AnimatedSlide(
+                  duration: fade,
+                  curve: Curves.easeOutCubic,
+                  offset: isActive ? Offset.zero : const Offset(-0.03, 0),
+                  child: AnimatedOpacity(
+                    duration: fade,
+                    opacity: isActive ? 1 : 0,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        frame(Icon(icon, size: 56, color: colorScheme.primary)),
+                        const SizedBox(height: 28),
+                        Text(
+                          numeral,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            letterSpacing: 4,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          title,
+                          style: theme.textTheme.displaySmall?.copyWith(
+                            color: colorScheme.onSurface,
+                            height: 1.1,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          height: 1,
+                          width: 72,
+                          color: colorScheme.outline,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          description,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            height: 1.6,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 64),
+              Expanded(
+                flex: 6,
+                child: AnimatedOpacity(
+                  duration: fade,
+                  opacity: isActive ? 1 : 0,
+                  child: ScrollEdgeFade(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: content,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

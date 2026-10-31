@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:mornye/widgets/dex/dex_boot_splash.dart';
 
 // ASCII lily, converted from an ink-wash photo. Each digit is a density level
 // (0 = paper, 9 = deepest ink); 84x42 characters.
@@ -101,8 +103,37 @@ String dexAsciiFrame(int tick) {
   return grid.map((r) => r.join()).join('\n');
 }
 
-/// A faint, animated ASCII plate drawn over the whole app. It never takes
-/// input, and it stops ticking when the system asks for reduced motion.
+/// Shared "settle" signal for the ambient plate.
+///
+/// Once the first real screen has loaded, the plate stops animating and
+/// softens into a blurred, dimmer backdrop: no per-frame work, and nothing
+/// moving behind the content while the user reads or works.
+abstract final class DexAmbient {
+  static final ValueNotifier<bool> calm = ValueNotifier<bool>(false);
+
+  /// Calm the plate, after the startup animation if it is still playing.
+  static void settle() {
+    if (calm.value) return;
+    if (dexBootFinished.value) {
+      calm.value = true;
+      return;
+    }
+    void onFinished() {
+      if (!dexBootFinished.value) return;
+      dexBootFinished.removeListener(onFinished);
+      calm.value = true;
+    }
+
+    dexBootFinished.addListener(onFinished);
+  }
+
+  /// Bring the plate back to life, for example for an immersive screen.
+  static void wake() => calm.value = false;
+}
+
+/// A faint ASCII plate drawn over the whole app. It never takes input. It
+/// animates until [DexAmbient.settle] is called, then freezes and blurs; it
+/// also stays still when the system asks for reduced motion.
 class DexAsciiBackdrop extends StatefulWidget {
   const DexAsciiBackdrop({super.key});
 
@@ -111,23 +142,41 @@ class DexAsciiBackdrop extends StatefulWidget {
 }
 
 class _DexAsciiBackdropState extends State<DexAsciiBackdrop> {
+  static const _calmBlur = 5.0;
+  static const _calmDim = 0.3;
+
   final _tick = ValueNotifier<int>(0);
   Timer? _timer;
 
   @override
+  void initState() {
+    super.initState();
+    DexAmbient.calm.addListener(_sync);
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _sync();
+  }
+
+  void _sync() {
     _timer?.cancel();
-    if (!MediaQuery.disableAnimationsOf(context)) {
+    _timer = null;
+    final still =
+        DexAmbient.calm.value || MediaQuery.disableAnimationsOf(context);
+    if (!still) {
       _timer = Timer.periodic(
         const Duration(milliseconds: 150),
         (_) => _tick.value++,
       );
     }
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    DexAmbient.calm.removeListener(_sync);
     _timer?.cancel();
     _tick.dispose();
     super.dispose();
@@ -136,26 +185,49 @@ class _DexAsciiBackdropState extends State<DexAsciiBackdrop> {
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final color = (dark ? const Color(0xFFF2F2F2) : const Color(0xFF0A0A0A))
-        .withValues(alpha: dark ? 0.15 : 0.12);
+    final base = (dark ? const Color(0xFFF2F2F2) : const Color(0xFF0A0A0A));
+    final alpha = dark ? 0.08 : 0.07;
+    final calm = DexAmbient.calm.value;
+    final reduce = MediaQuery.disableAnimationsOf(context);
     return RepaintBoundary(
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: ValueListenableBuilder<int>(
-          valueListenable: _tick,
-          builder: (context, tick, _) => Text(
-            dexAsciiFrame(tick),
-            style: TextStyle(
-              fontFamily: 'Consolas',
-              fontFamilyFallback: const [
-                'Cascadia Mono',
-                'Courier New',
-                'monospace',
-              ],
-              fontSize: 14,
-              height: 1.0,
-              color: color,
-              decoration: TextDecoration.none,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(end: calm ? 1.0 : 0.0),
+        duration: reduce ? Duration.zero : const Duration(milliseconds: 600),
+        curve: Curves.easeOutCubic,
+        builder: (context, t, child) {
+          final sigma = _calmBlur * t;
+          return Opacity(
+            opacity: 1 - _calmDim * t,
+            child: sigma < 0.05
+                ? child
+                : ImageFiltered(
+                    imageFilter: ImageFilter.blur(
+                      sigmaX: sigma,
+                      sigmaY: sigma,
+                      tileMode: TileMode.decal,
+                    ),
+                    child: child,
+                  ),
+          );
+        },
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: ValueListenableBuilder<int>(
+            valueListenable: _tick,
+            builder: (context, tick, _) => Text(
+              dexAsciiFrame(tick),
+              style: TextStyle(
+                fontFamily: 'Consolas',
+                fontFamilyFallback: const [
+                  'Cascadia Mono',
+                  'Courier New',
+                  'monospace',
+                ],
+                fontSize: 14,
+                height: 1.0,
+                color: base.withValues(alpha: alpha),
+                decoration: TextDecoration.none,
+              ),
             ),
           ),
         ),
