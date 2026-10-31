@@ -90,6 +90,14 @@ class _DesktopNowPlayingState extends ConsumerState<DesktopNowPlaying> {
     );
   }
 
+  /// Luminance-weighted greyscale at 70% brightness.
+  static const ColorFilter _backdropGreyscale = ColorFilter.matrix(<double>[
+    0.149, 0.501, 0.050, 0, 0, //
+    0.149, 0.501, 0.050, 0, 0, //
+    0.149, 0.501, 0.050, 0, 0, //
+    0, 0, 0, 1, 0, //
+  ]);
+
   Widget _buildPlayer(BuildContext context, MediaItem? mediaItem) {
     final mornye = context.isMornye;
     final theme = mornye
@@ -103,13 +111,21 @@ class _DesktopNowPlayingState extends ConsumerState<DesktopNowPlaying> {
         child: Stack(
           fit: StackFit.expand,
           children: [
+            // Dex keeps the cover in colour but the backdrop black and white:
+            // greyscale, and a little darker so the controls stay legible.
             if (mornye)
-              MornyePlayerBackground(artUri: mediaItem?.artUri)
+              ColorFiltered(
+                colorFilter: _backdropGreyscale,
+                child: MornyePlayerBackground(artUri: mediaItem?.artUri),
+              )
             else if (mediaItem != null)
-              MaterialPlayerBackdrop(
-                mediaItem: mediaItem,
-                colorScheme: colorScheme,
-                showArtwork: false,
+              ColorFiltered(
+                colorFilter: _backdropGreyscale,
+                child: MaterialPlayerBackdrop(
+                  mediaItem: mediaItem,
+                  colorScheme: colorScheme,
+                  showArtwork: false,
+                ),
               )
             else
               ColoredBox(color: colorScheme.surface),
