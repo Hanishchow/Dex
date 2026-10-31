@@ -360,6 +360,7 @@ extension _HomeTabSearchResultsUI on _HomeTabState {
       slivers.addAll(
         _buildVirtualizedResultSection(
           title: context.l10n.searchArtists,
+          grid: true,
           itemCount: artistItems.length,
           colorScheme: colorScheme,
           showSortButton: !sortButtonShown,
@@ -379,6 +380,7 @@ extension _HomeTabSearchResultsUI on _HomeTabState {
       slivers.addAll(
         _buildVirtualizedResultSection(
           title: context.l10n.searchAlbums,
+          grid: true,
           itemCount: albumItems.length,
           colorScheme: colorScheme,
           showSortButton: !sortButtonShown,
@@ -398,6 +400,7 @@ extension _HomeTabSearchResultsUI on _HomeTabState {
       slivers.addAll(
         _buildVirtualizedResultSection(
           title: context.l10n.searchPlaylists,
+          grid: true,
           itemCount: playlistItems.length,
           colorScheme: colorScheme,
           showSortButton: !sortButtonShown,
@@ -456,10 +459,15 @@ extension _HomeTabSearchResultsUI on _HomeTabState {
     required ColorScheme colorScheme,
     required Widget Function(int index, bool showDivider) itemBuilder,
     bool showSortButton = false,
+    bool grid = false,
   }) {
     // Material result groups are grouped rows, on the settings group tier.
     final sectionColor = colorScheme.surfaceContainer;
     final mornye = context.isMornye;
+    final windowWidth = MediaQuery.sizeOf(context).width;
+    final gridColumns = grid && isDesktopPlatform && !mornye
+        ? (windowWidth >= 1200 ? 3 : (windowWidth >= 900 ? 2 : 1))
+        : 1;
 
     return [
       SliverToBoxAdapter(
@@ -523,48 +531,81 @@ extension _HomeTabSearchResultsUI on _HomeTabState {
           ),
         ),
       ),
-      SliverPadding(
-        padding: EdgeInsets.symmetric(horizontal: wideListInset(context)),
-        sliver: SliverList(
-          delegate: SliverChildBuilderDelegate((context, index) {
-            final isFirst = index == 0;
-            final isLast = index == itemCount - 1;
-            if (mornye) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: MornyeGlassPanel.overlay(
-                  blurEnabled: false,
-                  radius: 24,
-                  firstInGroup: isFirst,
-                  lastInGroup: isLast,
-                  child: itemBuilder(index, !isLast),
-                ),
-              );
-            }
-            // Connected list: each result is its own surface, separated by a
-            // 2dp gap with tight inner corners instead of row dividers.
-            const inner = Radius.circular(4);
-            return StaggeredListItem(
-              index: index,
-              child: Container(
-                margin: EdgeInsets.fromLTRB(16, 0, 16, isLast ? 0 : 2),
-                decoration: BoxDecoration(
-                  color: sectionColor,
-                  borderRadius: BorderRadius.vertical(
-                    top: isFirst ? const Radius.circular(20) : inner,
-                    bottom: isLast ? const Radius.circular(20) : inner,
+      if (gridColumns > 1)
+        // Desktop: collections tile as cards across the window instead of
+        // stretching one row over the full width.
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverGrid(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: gridColumns,
+              mainAxisExtent: 76,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 8,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => StaggeredListItem(
+                index: index,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: sectionColor,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: colorScheme.outlineVariant),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: itemBuilder(index, false),
                   ),
                 ),
-                clipBehavior: Clip.antiAlias,
-                child: Material(
-                  color: Colors.transparent,
-                  child: itemBuilder(index, false),
-                ),
               ),
-            );
-          }, childCount: itemCount),
+              childCount: itemCount,
+            ),
+          ),
+        )
+      else
+        SliverPadding(
+          padding: EdgeInsets.symmetric(horizontal: wideListInset(context)),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final isFirst = index == 0;
+              final isLast = index == itemCount - 1;
+              if (mornye) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: MornyeGlassPanel.overlay(
+                    blurEnabled: false,
+                    radius: 24,
+                    firstInGroup: isFirst,
+                    lastInGroup: isLast,
+                    child: itemBuilder(index, !isLast),
+                  ),
+                );
+              }
+              // Connected list: each result is its own surface, separated by a
+              // 2dp gap with tight inner corners instead of row dividers.
+              const inner = Radius.circular(4);
+              return StaggeredListItem(
+                index: index,
+                child: Container(
+                  margin: EdgeInsets.fromLTRB(16, 0, 16, isLast ? 0 : 2),
+                  decoration: BoxDecoration(
+                    color: sectionColor,
+                    borderRadius: BorderRadius.vertical(
+                      top: isFirst ? const Radius.circular(20) : inner,
+                      bottom: isLast ? const Radius.circular(20) : inner,
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: itemBuilder(index, false),
+                  ),
+                ),
+              );
+            }, childCount: itemCount),
+          ),
         ),
-      ),
     ];
   }
 
