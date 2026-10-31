@@ -1408,6 +1408,7 @@ class _HomeTabState extends ConsumerState<HomeTab>
       return SizedBox(
         height: emptyHeight,
         child: DexEmptyState(
+          art: DexArtwork.lilyChandelier,
           title: context.l10n.homeEmptyTitle,
           message: context.l10n.homeEmptySubtitle,
         ),

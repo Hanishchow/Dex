@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:mornye/theme/dex_gothic.dart';
+import 'package:mornye/widgets/dex/dex_ornament.dart';
 
 /// A small engraved lily, drawn in monospace. Used until the SVG emblem set
 /// replaces it.
@@ -23,12 +24,17 @@ class DexEmptyState extends StatelessWidget {
     this.message,
     this.action,
     this.emblem = dexLilyEmblem,
+    this.art,
   });
 
   final String title;
   final String? message;
   final Widget? action;
   final String emblem;
+
+  /// Gothic artwork shown instead of the ASCII [emblem] when the artwork
+  /// level is on.
+  final DexArtwork? art;
 
   @override
   Widget build(BuildContext context) {
@@ -42,17 +48,28 @@ class DexEmptyState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ExcludeSemantics(
-                child: Text(
-                  emblem,
-                  style: TextStyle(
-                    fontFamily: 'Consolas',
-                    fontFamilyFallback: const ['Cascadia Mono', 'monospace'],
-                    fontSize: 15,
-                    height: 1.15,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
+              ValueListenableBuilder<DexArtworkLevel>(
+                valueListenable: DexArt.level,
+                builder: (context, level, _) {
+                  if (art != null && level != DexArtworkLevel.off) {
+                    return DexOrnament(art!, height: 220, opacity: 0.6);
+                  }
+                  return ExcludeSemantics(
+                    child: Text(
+                      emblem,
+                      style: TextStyle(
+                        fontFamily: 'Consolas',
+                        fontFamilyFallback: const [
+                          'Cascadia Mono',
+                          'monospace',
+                        ],
+                        fontSize: 15,
+                        height: 1.15,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 24),
               Text(

@@ -11,6 +11,7 @@ import 'package:mornye/utils/nav_bar_inset.dart';
 import 'package:mornye/widgets/settings_group.dart';
 import 'package:mornye/widgets/app_icon.dart';
 import 'package:mornye/widgets/app_sliver_header.dart';
+import 'package:mornye/widgets/dex/dex_ornament.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -312,70 +313,89 @@ class _AppHeaderCard extends StatelessWidget {
         final contentPadding = (cardWidth * 0.06).clamp(16.0, 24.0);
         final titleGap = (16 * (1 + ((textScale - 1) * 0.2))).clamp(12.0, 20.0);
 
-        return Container(
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          padding: EdgeInsets.all(contentPadding),
-          child: Column(
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            fit: StackFit.passthrough,
             children: [
-              Container(
-                width: logoSize,
-                height: logoSize,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  shape: BoxShape.circle,
+              // Gothic figure artwork on the right of the card, faint.
+              const Positioned(
+                right: 12,
+                top: 0,
+                bottom: 0,
+                child: DexOrnament(
+                  DexArtwork.figure,
+                  height: 320,
+                  opacity: 0.5,
+                  alignment: Alignment.centerRight,
                 ),
-                // The asset is the bare mark, so inset it within the disc.
-                padding: EdgeInsets.all(logoSize * 0.24),
-                child: Image.asset(
-                  'assets/images/logo-transparent.png',
-                  color: colorScheme.onPrimary,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: Image.asset(
-                      'assets/images/logo.png',
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: cardColor.withValues(alpha: 0.6),
+                ),
+                padding: EdgeInsets.all(contentPadding),
+                child: Column(
+                  children: [
+                    Container(
                       width: logoSize,
                       height: logoSize,
-                      fit: BoxFit.cover,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      // The asset is the bare mark, so inset it within the disc.
+                      padding: EdgeInsets.all(logoSize * 0.24),
+                      child: Image.asset(
+                        'assets/images/logo-transparent.png',
+                        color: colorScheme.onPrimary,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, _, _) => ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            width: logoSize,
+                            height: logoSize,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
-              SizedBox(height: titleGap),
-              Text(
-                AppInfo.appName,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'v${AppInfo.displayVersion}',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onSecondaryContainer,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              SizedBox(height: titleGap),
-              Text(
-                context.l10n.aboutAppDescription,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                    SizedBox(height: titleGap),
+                    Text(
+                      AppInfo.appName,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'v${AppInfo.displayVersion}',
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: colorScheme.onSecondaryContainer,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                    SizedBox(height: titleGap),
+                    Text(
+                      context.l10n.aboutAppDescription,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -7,6 +7,7 @@ import 'package:mornye/l10n/l10n.dart';
 import 'package:mornye/theme/app_tokens.dart';
 import 'package:mornye/utils/adaptive_layout.dart';
 import 'package:mornye/utils/desktop_platform.dart';
+import 'package:mornye/widgets/dex/dex_ornament.dart';
 import 'package:mornye/widgets/scroll_edge_fade.dart';
 import 'package:mornye/widgets/app_icon_button.dart';
 import 'package:mornye/widgets/app_loading_indicator.dart';
@@ -807,6 +808,30 @@ class _TutorialPage extends StatelessWidget {
 
   static const _numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 
+  /// Gothic emblem for each page of the tour; the Material icon remains the
+  /// fallback when artwork is switched off.
+  static const _emblems = [
+    DexArtwork.crossCrescent,
+    DexArtwork.thornCrescent,
+    DexArtwork.sword,
+    DexArtwork.glowCrosses,
+    DexArtwork.binaryStars,
+    DexArtwork.lilyChandelier,
+  ];
+
+  Widget _emblem(ColorScheme colorScheme) {
+    final art = _emblems[index % _emblems.length];
+    return ValueListenableBuilder<DexArtworkLevel>(
+      valueListenable: DexArt.level,
+      builder: (context, level, _) => level == DexArtworkLevel.off
+          ? Icon(icon, size: 56, color: colorScheme.primary)
+          : Padding(
+              padding: const EdgeInsets.all(12),
+              child: DexOrnament(art, height: 96, opacity: 0.9),
+            ),
+    );
+  }
+
   /// Wide windows: emblem, title and description on the left, the tips or
   /// the interactive example on the right, so the page uses the window
   /// instead of a narrow phone column.
@@ -852,7 +877,7 @@ class _TutorialPage extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        frame(Icon(icon, size: 56, color: colorScheme.primary)),
+                        frame(_emblem(colorScheme)),
                         const SizedBox(height: 28),
                         Text(
                           numeral,

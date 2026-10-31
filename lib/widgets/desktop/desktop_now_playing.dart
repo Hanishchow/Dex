@@ -5,6 +5,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart' show CupertinoButton, CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:mornye/widgets/dex/dex_ornament.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mornye/controllers/player_metadata_controller.dart';
 import 'package:mornye/l10n/l10n.dart';
@@ -129,6 +130,41 @@ class _DesktopNowPlayingState extends ConsumerState<DesktopNowPlaying> {
               )
             else
               ColoredBox(color: colorScheme.surface),
+            // Gothic artwork: a thorn crescent glows behind the player, the
+            // crosses stand at the right edge while no panel is open, and
+            // handwriting fills the panel side as faint paper.
+            const Positioned.fill(
+              child: Align(
+                alignment: Alignment(-0.15, -0.1),
+                child: DexOrnament(
+                  DexArtwork.thornCrescent,
+                  height: 680,
+                  opacity: 0.14,
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: ValueListenableBuilder<DesktopInspectorPanel?>(
+                valueListenable: desktopInspectorPanel,
+                builder: (context, panel, _) => panel == null
+                    ? const Align(
+                        alignment: Alignment.centerRight,
+                        child: DexOrnament(
+                          DexArtwork.glowCrosses,
+                          height: 560,
+                          opacity: 0.3,
+                        ),
+                      )
+                    : const Align(
+                        alignment: Alignment.centerRight,
+                        child: DexOrnament(
+                          DexArtwork.script,
+                          height: 640,
+                          opacity: 0.08,
+                        ),
+                      ),
+              ),
+            ),
             ValueListenableBuilder<DesktopInspectorPanel?>(
               valueListenable: desktopInspectorPanel,
               builder: (context, panel, _) => mediaItem == null
