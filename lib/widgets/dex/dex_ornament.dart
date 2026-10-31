@@ -34,19 +34,35 @@ abstract final class DexArt {
     DexArtworkLevel.heavy,
   );
 
+  static const _startupKey = 'dex_startup_animation';
+
+  /// Whether the startup animation plays at launch.
+  static final ValueNotifier<bool> startupAnimation = ValueNotifier(true);
+
   static bool _loaded = false;
 
-  /// Reads the saved level once. Safe to call repeatedly.
+  /// Reads the saved settings once. Safe to call repeatedly.
   static Future<void> load() async {
     if (_loaded) return;
     _loaded = true;
     try {
-      final saved = (await SharedPreferences.getInstance()).getString(_key);
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString(_key);
       for (final value in DexArtworkLevel.values) {
         if (value.name == saved) level.value = value;
       }
+      startupAnimation.value = prefs.getBool(_startupKey) ?? true;
     } catch (_) {
-      // Keep the default when preferences are unavailable.
+      // Keep the defaults when preferences are unavailable.
+    }
+  }
+
+  static Future<void> setStartupAnimation(bool value) async {
+    startupAnimation.value = value;
+    try {
+      await (await SharedPreferences.getInstance()).setBool(_startupKey, value);
+    } catch (_) {
+      // The choice still applies for this session.
     }
   }
 
@@ -159,6 +175,63 @@ class _DexGothicBackdropState extends State<DexGothicBackdrop> {
         fit: BoxFit.cover,
         opacity: 0.07,
         minLevel: DexArtworkLevel.subtle,
+      ),
+    );
+  }
+}
+
+/// A halftone star that turns slowly: the loading indicator on desktop when
+/// artwork is on. It stands still under reduced motion.
+class DexStarSpinner extends StatefulWidget {
+  const DexStarSpinner({super.key, this.size = 32});
+
+  final double size;
+
+  @override
+  State<DexStarSpinner> createState() => _DexStarSpinnerState();
+}
+
+class _DexStarSpinnerState extends State<DexStarSpinner>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _turns = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1800),
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final animate =
+        !MediaQuery.disableAnimationsOf(context) &&
+        TickerMode.valuesOf(context).enabled;
+    if (animate) {
+      if (!_turns.isAnimating) _turns.repeat();
+    } else {
+      _turns.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _turns.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Loading',
+      child: SizedBox.square(
+        dimension: widget.size,
+        child: RotationTransition(
+          turns: _turns,
+          child: DexOrnament(
+            DexArtwork.halftoneStar,
+            width: widget.size,
+            height: widget.size,
+            opacity: 0.95,
+          ),
+        ),
       ),
     );
   }

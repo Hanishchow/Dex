@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 /// Strictly black and white: ink-black surfaces, bone-white text, grey
 /// outlines, Cinzel for headings. Everything reads from the color scheme and
 /// text theme, so widgets pick it up without per-screen changes.
+/// Dex uses one fixed black-and-white palette. The seed colour, dynamic colour
+/// and AMOLED controls from the original app no longer change anything, so the
+/// settings page hides them while this is false.
+const bool dexCustomColors = false;
+
 const String dexHeadingFont = 'Cinzel';
 const String dexBlackletterFont = 'UnifrakturCook';
 

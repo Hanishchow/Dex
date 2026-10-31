@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:mornye/theme/material_expressive.dart';
 import 'package:mornye/theme/mornye_theme.dart';
+import 'package:mornye/utils/desktop_platform.dart';
+import 'package:mornye/widgets/dex/dex_ornament.dart';
 
 /// Indeterminate loading only. Downloads/analysis keep their real progress.
 class AppLoadingIndicator extends StatelessWidget {
@@ -25,6 +27,10 @@ class AppLoadingIndicator extends StatelessWidget {
     final animate =
         !MediaQuery.disableAnimationsOf(context) &&
         TickerMode.valuesOf(context).enabled;
+    // Desktop with artwork on: the halftone star turns instead of a ring.
+    if (isDesktopPlatform && DexArt.level.value != DexArtworkLevel.off) {
+      return DexStarSpinner(size: size);
+    }
     return SizedBox.square(
       dimension: size,
       child: !context.isMornye

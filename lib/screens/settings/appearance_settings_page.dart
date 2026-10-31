@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mornye/screens/settings/dex_gothic_settings.dart';
+import 'package:mornye/theme/dex_gothic.dart';
 import 'package:mornye/widgets/app_bottom_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mornye/l10n/l10n.dart';
@@ -111,6 +113,11 @@ class AppearanceSettingsPage extends ConsumerWidget {
               ),
             ),
 
+            const SliverToBoxAdapter(
+              child: SettingsSectionHeader(title: 'Gothic artwork'),
+            ),
+            const SliverToBoxAdapter(child: DexGothicSettingsGroup()),
+
             if (themeSettings.style == AppThemeStyle.mornye) ...[
               SliverToBoxAdapter(
                 child: SettingsSectionHeader(title: context.l10n.sectionColor),
@@ -139,7 +146,7 @@ class AppearanceSettingsPage extends ConsumerWidget {
                   ],
                 ),
               ),
-            ] else ...[
+            ] else if (dexCustomColors) ...[
               SliverToBoxAdapter(
                 child: SettingsSectionHeader(title: context.l10n.sectionColor),
               ),
@@ -185,7 +192,8 @@ class AppearanceSettingsPage extends ConsumerWidget {
                     onChanged: (mode) =>
                         ref.read(themeProvider.notifier).setThemeMode(mode),
                   ),
-                  if (themeSettings.style == AppThemeStyle.material &&
+                  if (dexCustomColors &&
+                      themeSettings.style == AppThemeStyle.material &&
                       Theme.of(context).brightness == Brightness.dark)
                     SettingsSwitchItem(
                       icon: Icons.brightness_2,

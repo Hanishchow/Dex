@@ -6,6 +6,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'dex_boot_art.dart';
+import 'dex_ornament.dart';
 
 /// True once the startup animation has finished or been skipped. It is a
 /// process-wide flag so the animation plays once per cold start, not once per
@@ -132,6 +133,16 @@ class _DexBootSplashState extends State<DexBootSplash>
   void initState() {
     super.initState();
     _ticker = createTicker(_onTick)..start();
+    DexArt.startupAnimation.addListener(_onPreference);
+    // The saved choice may already be loaded.
+    if (!DexArt.startupAnimation.value) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _finish());
+    }
+  }
+
+  /// The user turned the startup animation off: end it at once.
+  void _onPreference() {
+    if (!DexArt.startupAnimation.value) _finish();
   }
 
   @override
@@ -169,6 +180,7 @@ class _DexBootSplashState extends State<DexBootSplash>
 
   @override
   void dispose() {
+    DexArt.startupAnimation.removeListener(_onPreference);
     _ticker.dispose();
     _time.dispose();
     super.dispose();

@@ -7,6 +7,7 @@ import 'package:mornye/theme/mornye_theme.dart';
 import 'package:mornye/utils/desktop_platform.dart';
 import 'package:mornye/widgets/app_bottom_sheet.dart';
 import 'package:mornye/widgets/app_icon.dart';
+import 'package:mornye/widgets/dex/dex_ornament.dart';
 import 'package:mornye/widgets/expressive_button.dart';
 import 'package:mornye/widgets/mornye_chrome.dart';
 
@@ -96,11 +97,27 @@ class AppDialogSurface extends StatelessWidget {
       ),
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
-        child: mornye
-            ? MornyeGlassPanel.overlay(
-                child: SingleChildScrollView(child: child),
-              )
-            : child,
+        child: Stack(
+          fit: StackFit.passthrough,
+          children: [
+            mornye
+                ? MornyeGlassPanel.overlay(
+                    child: SingleChildScrollView(child: child),
+                  )
+                : child,
+            // Gothic filigree in the top-right corner of every dialog.
+            const Positioned(
+              top: 0,
+              right: 0,
+              child: DexOrnament(
+                DexArtwork.cornerFiligree,
+                width: 150,
+                opacity: 0.16,
+                alignment: Alignment.topRight,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
