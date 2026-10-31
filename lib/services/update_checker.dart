@@ -258,6 +258,9 @@ class UpdateChecker {
   Future<({String body, bool verified})?> _fetchReleasesBody() async {
     final prefs = await SharedPreferences.getInstance();
     final repo = _releaseRepo;
+    // Dex has no release repository yet. Never ask the upstream project's
+    // releases, which would offer Mornye builds as Dex updates.
+    if (repo.isEmpty) return null;
     // A list saved before the desktop repository split (no repo recorded) is
     // the main repository's.
     final cachedRepo = prefs.getString(_cachedRepoKey) ?? AppInfo.githubRepo;

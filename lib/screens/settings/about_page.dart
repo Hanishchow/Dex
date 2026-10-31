@@ -38,6 +38,30 @@ class AboutPage extends StatelessWidget {
               ),
             ),
 
+            // Credit comes first: Dex is a modified version of Mornye.
+            const SliverToBoxAdapter(
+              child: SettingsSectionHeader(title: 'Built on'),
+            ),
+            SliverToBoxAdapter(
+              child: SettingsGroup(
+                connected: true,
+                children: [
+                  _AboutSettingsItem(
+                    icon: Icons.favorite_border_rounded,
+                    title:
+                        '${AppInfo.upstreamName} by ${AppInfo.mobileAuthor} '
+                        'and contributors',
+                    subtitle:
+                        'Dex is a modified version of ${AppInfo.upstreamName}, '
+                        'released under ${AppInfo.license}. Original source '
+                        'and full credits: github.com/${AppInfo.upstreamRepo}',
+                    onTap: () => _launchUrl(AppInfo.upstreamUrl),
+                    showDivider: false,
+                  ),
+                ],
+              ),
+            ),
+
             SliverToBoxAdapter(
               child: SettingsSectionHeader(
                 title: context.l10n.aboutContributors,
@@ -147,11 +171,39 @@ class AboutPage extends StatelessWidget {
               child: SettingsGroup(
                 connected: true,
                 children: [
+                  // Dex's own links come first and only exist once Dex has a
+                  // repository. Issues for a modified build must not be sent
+                  // to the original project's maintainers.
+                  if (AppInfo.hasRepo) ...[
+                    _AboutSettingsItem(
+                      icon: Icons.code_rounded,
+                      title: context.l10n.aboutMobileSource,
+                      subtitle: 'github.com/${AppInfo.githubRepo}',
+                      onTap: () => _launchUrl(AppInfo.githubUrl),
+                      showDivider: true,
+                    ),
+                    _AboutSettingsItem(
+                      icon: Icons.bug_report_outlined,
+                      title: context.l10n.aboutReportIssue,
+                      subtitle: context.l10n.aboutReportIssueSubtitle,
+                      onTap: () =>
+                          _launchUrl('${AppInfo.githubUrl}/issues/new'),
+                      showDivider: true,
+                    ),
+                    _AboutSettingsItem(
+                      icon: Icons.lightbulb_outline,
+                      title: context.l10n.aboutFeatureRequest,
+                      subtitle: context.l10n.aboutFeatureRequestSubtitle,
+                      onTap: () =>
+                          _launchUrl('${AppInfo.githubUrl}/issues/new'),
+                      showDivider: true,
+                    ),
+                  ],
                   _AboutSettingsItem(
-                    icon: Icons.phone_android,
-                    title: context.l10n.aboutMobileSource,
-                    subtitle: 'github.com/${AppInfo.githubRepo}',
-                    onTap: () => _launchUrl(AppInfo.githubUrl),
+                    icon: Icons.history_edu_outlined,
+                    title: '${AppInfo.upstreamName} (original project)',
+                    subtitle: 'github.com/${AppInfo.upstreamRepo}',
+                    onTap: () => _launchUrl(AppInfo.upstreamUrl),
                     showDivider: true,
                   ),
                   _AboutSettingsItem(
@@ -166,45 +218,6 @@ class AboutPage extends StatelessWidget {
                     title: context.l10n.aboutServiceStatus,
                     subtitle: 'status.zarz.moe',
                     onTap: () => _launchUrl('https://status.zarz.moe'),
-                    showDivider: true,
-                  ),
-                  _AboutSettingsItem(
-                    icon: Icons.bug_report_outlined,
-                    title: context.l10n.aboutReportIssue,
-                    subtitle: context.l10n.aboutReportIssueSubtitle,
-                    onTap: () => _launchUrl('${AppInfo.githubUrl}/issues/new'),
-                    showDivider: true,
-                  ),
-                  _AboutSettingsItem(
-                    icon: Icons.lightbulb_outline,
-                    title: context.l10n.aboutFeatureRequest,
-                    subtitle: context.l10n.aboutFeatureRequestSubtitle,
-                    onTap: () => _launchUrl('${AppInfo.githubUrl}/issues/new'),
-                    showDivider: false,
-                  ),
-                ],
-              ),
-            ),
-
-            SliverToBoxAdapter(
-              child: SettingsSectionHeader(title: context.l10n.aboutSocial),
-            ),
-            SliverToBoxAdapter(
-              child: SettingsGroup(
-                connected: true,
-                children: [
-                  _AboutSettingsItem(
-                    icon: Icons.telegram,
-                    title: context.l10n.aboutTelegramChannel,
-                    subtitle: context.l10n.aboutTelegramChannelSubtitle,
-                    onTap: () => _launchUrl('https://t.me/mornyeupdates'),
-                    showDivider: true,
-                  ),
-                  _AboutSettingsItem(
-                    icon: Icons.forum_outlined,
-                    title: context.l10n.aboutTelegramChat,
-                    subtitle: context.l10n.aboutTelegramChatSubtitle,
-                    onTap: () => _launchUrl('https://t.me/mornyecommunity'),
                     showDivider: false,
                   ),
                 ],

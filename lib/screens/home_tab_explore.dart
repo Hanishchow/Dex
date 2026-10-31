@@ -197,8 +197,9 @@ extension _HomeTabExploreUI on _HomeTabState {
     return Semantics(
       button: true,
       label: context.l10n.a11yOpenItem(item.type, item.name),
-      child: GestureDetector(
+      child: DexPressable(
         onTap: () => _navigateToExploreItem(item, itemContext),
+        borderRadius: BorderRadius.circular(12),
         child: SizedBox(
           width: cardSize,
           child: Padding(

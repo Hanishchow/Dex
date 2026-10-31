@@ -476,7 +476,7 @@ class _DesktopMenuBar extends StatelessWidget {
                   label: l10n.desktopMenuProjectPage,
                   onSelected: () => unawaited(
                     launchUrl(
-                      Uri.parse(AppInfo.githubUrl),
+                      Uri.parse(AppInfo.projectUrl),
                       mode: LaunchMode.externalApplication,
                     ),
                   ),

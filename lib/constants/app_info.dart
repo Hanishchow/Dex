@@ -20,15 +20,34 @@ class AppInfo {
 
   static const String appName = 'Dex';
   static const String license = 'LGPL-3.0-only';
-  static const String copyright = '© 2026 Zarz Eleutherius';
+  static const String copyright =
+      'Based on Mornye · © 2026 Zarz Eleutherius and contributors';
 
   static const String mobileAuthor = 'zarzet';
 
-  static const String githubRepo = 'mornyeapp/Mornye';
-  static const String githubUrl = 'https://github.com/$githubRepo';
+  /// Dex's own repository as "owner/name". Empty until it is published; while
+  /// empty, Dex shows no issue links and does not check for updates.
+  static const String dexRepo = '';
+  static bool get hasRepo => dexRepo.isNotEmpty;
 
-  /// Desktop packages are published here; the source stays in [githubRepo].
-  static const String desktopGithubRepo = 'mornyeapp/Mornye-Desktop';
+  /// The project Dex is built on. Kept for credit and licence reasons: Dex is
+  /// a modified version of it, under the same LGPL-3.0-only licence.
+  static const String upstreamName = 'Mornye';
+  static const String upstreamRepo = 'mornyeapp/Mornye';
+  static const String upstreamUrl = 'https://github.com/$upstreamRepo';
+
+  static const String githubRepo = dexRepo;
+  static const String githubUrl = hasRepoUrl
+      ? 'https://github.com/$dexRepo'
+      : '';
+  static const bool hasRepoUrl = dexRepo != '';
+
+  /// Where "project" links go: Dex's repository, or the upstream project's
+  /// page when Dex has none yet.
+  static String get projectUrl => hasRepo ? githubUrl : upstreamUrl;
+
+  /// Desktop packages are published to the same repository.
+  static const String desktopGithubRepo = dexRepo;
   // The server keeps the endpoint name from before the rename.
   static const String remoteConfigApiUrl =
       'https://api.zarz.moe/v1/spotiflac-mobile/config';

@@ -161,8 +161,12 @@ class _PlayerArtworkThemeState extends State<PlayerArtworkTheme>
       base.brightness == Brightness.dark &&
       base.colorScheme.surface == Colors.black;
 
+  /// Dex is strictly black and white: the interface never takes a hue from
+  /// the cover. Artwork keeps its own colours; the chrome around it does not.
+  static const bool _monochrome = true;
+
   ThemeData _themeFor(ThemeData base) {
-    final artwork = _artwork;
+    final artwork = _monochrome ? null : _artwork;
     final target = artwork == null
         ? base.colorScheme
         : _isAmoled(base)
