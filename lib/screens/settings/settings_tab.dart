@@ -190,16 +190,20 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             searchEntries: searchCatalog.extensions,
             pageBuilder: () => const ExtensionsPage(),
           ),
-          _Destination(
-            icon: Icons.favorite_outline,
-            iconColor: Colors.pink,
-            title: l10n.settingsDonate,
-            subtitle: l10n.settingsDonateSubtitle,
-            keywords: const ['support', 'ko-fi', 'sponsor'],
-            pageBuilder: () =>
-                DonatePage(remoteConfigService: _remoteConfigService),
-            showDonationProgress: true,
-          ),
+          // The donation page and its monthly goal belong to the original
+          // developer's server and accounts. Dex does not present them as its
+          // own; the About page credits and links the original project.
+          if (AppInfo.showUpstreamDonations)
+            _Destination(
+              icon: Icons.favorite_outline,
+              iconColor: Colors.pink,
+              title: l10n.settingsDonate,
+              subtitle: l10n.settingsDonateSubtitle,
+              keywords: const ['support', 'ko-fi', 'sponsor'],
+              pageBuilder: () =>
+                  DonatePage(remoteConfigService: _remoteConfigService),
+              showDonationProgress: true,
+            ),
           _Destination(
             icon: Icons.palette_outlined,
             iconColor: Colors.purple,

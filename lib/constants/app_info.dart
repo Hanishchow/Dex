@@ -42,6 +42,10 @@ class AppInfo {
       : '';
   static const bool hasRepoUrl = dexRepo != '';
 
+  /// Whether to show the original developer's donation page and monthly goal
+  /// in Settings. Off: those accounts and goals are not Dex's.
+  static const bool showUpstreamDonations = false;
+
   /// Where "project" links go: Dex's repository, or the upstream project's
   /// page when Dex has none yet.
   static String get projectUrl => hasRepo ? githubUrl : upstreamUrl;

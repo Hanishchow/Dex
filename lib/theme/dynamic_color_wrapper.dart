@@ -27,22 +27,26 @@ class DynamicColorWrapper extends ConsumerWidget {
       builder: (lightDynamic, darkDynamic) {
         if (themeSettings.style == AppThemeStyle.mornye) {
           return builder(
-            applyDexGothic(MornyeTheme.build(
-              Brightness.light,
-              accent: themeSettings.mornyeAccent,
-              useSystemFont: themeSettings.useSystemFont,
-              fontFamily: fontFamily,
-              glassClarity: themeSettings.mornyeGlassClarity,
-              glassOutlines: themeSettings.mornyeGlassOutlines,
-            )),
-            applyDexGothic(MornyeTheme.build(
-              Brightness.dark,
-              accent: themeSettings.mornyeAccent,
-              useSystemFont: themeSettings.useSystemFont,
-              fontFamily: fontFamily,
-              glassClarity: themeSettings.mornyeGlassClarity,
-              glassOutlines: themeSettings.mornyeGlassOutlines,
-            )),
+            applyDexGothic(
+              MornyeTheme.build(
+                Brightness.light,
+                accent: themeSettings.mornyeAccent,
+                useSystemFont: themeSettings.useSystemFont,
+                fontFamily: fontFamily,
+                glassClarity: themeSettings.mornyeGlassClarity,
+                glassOutlines: themeSettings.mornyeGlassOutlines,
+              ),
+            ),
+            applyDexGothic(
+              MornyeTheme.build(
+                Brightness.dark,
+                accent: themeSettings.mornyeAccent,
+                useSystemFont: themeSettings.useSystemFont,
+                fontFamily: fontFamily,
+                glassClarity: themeSettings.mornyeGlassClarity,
+                glassOutlines: themeSettings.mornyeGlassOutlines,
+              ),
+            ),
             themeSettings.themeMode,
           );
         }
@@ -70,6 +74,11 @@ class DynamicColorWrapper extends ConsumerWidget {
         if (themeSettings.useAmoled) {
           darkScheme = _applyAmoledColors(darkScheme);
         }
+
+        // Dex is strictly black and white: ignore the seed colour and the
+        // system accent, and build every component theme from the Dex palette.
+        lightScheme = dexColorScheme(Brightness.light);
+        darkScheme = dexColorScheme(Brightness.dark);
 
         final lightTheme = AppTheme.light(
           dynamicScheme: lightScheme,
