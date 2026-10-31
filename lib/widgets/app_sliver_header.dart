@@ -5,6 +5,7 @@ import 'package:mornye/widgets/app_icon.dart';
 import 'package:mornye/widgets/app_icon_button.dart';
 import 'package:mornye/utils/adaptive_layout.dart';
 import 'package:mornye/utils/app_bar_layout.dart';
+import 'package:mornye/utils/desktop_platform.dart';
 
 /// The collapsing header used by every top-level tab and every settings-style
 /// sub-page.
@@ -137,10 +138,14 @@ class AppSliverHeader extends StatelessWidget {
               : 0.0;
           final contentMargin =
               _contentMargin + (alignToContent ? wideListInset(context) : 0);
+          // On desktop the expanded header is short, so the title shares a row
+          // with the back button; keep it clear of the button at every size.
           final leftPadding = showLeading
-              ? (_leadingClearance + edgeInset) -
-                    (((_leadingClearance + edgeInset) - contentMargin) *
-                        expandRatio)
+              ? (isDesktopPlatform
+                    ? _leadingClearance + edgeInset
+                    : (_leadingClearance + edgeInset) -
+                          (((_leadingClearance + edgeInset) - contentMargin) *
+                              expandRatio))
               : contentMargin;
           final fontSize =
               tokens.headerCollapsedTitleSize +

@@ -54,7 +54,7 @@ class AppearanceSettingsPage extends ConsumerWidget {
                         children: [
                           Text(
                             style == AppThemeStyle.mornye
-                                ? 'Dex'
+                                ? 'Glass'
                                 : 'Material',
                           ),
                           if (style == AppThemeStyle.mornye)
