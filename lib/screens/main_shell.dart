@@ -32,6 +32,7 @@ import 'package:mornye/services/music_playback_deck.dart';
 import 'package:mornye/services/listening_statistics.dart';
 import 'package:mornye/services/discord_presence_service.dart';
 import 'package:mornye/services/notification_service.dart';
+import 'package:mornye/constants/app_info.dart';
 import 'package:mornye/services/app_remote_config_service.dart';
 import 'package:mornye/services/update_checker.dart';
 import 'package:mornye/widgets/app_announcement_dialog.dart';

@@ -121,6 +121,8 @@ extension _MainShellStartupPrompts on _MainShellState {
   }
 
   Future<void> _checkAppAnnouncement() async {
+    // Dex shows no upstream announcements (they are Mornye's own campaigns).
+    if (!AppInfo.showUpstreamAnnouncements) return;
     if (_hasCheckedAppAnnouncement) return;
     _hasCheckedAppAnnouncement = true;
 

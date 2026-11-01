@@ -46,6 +46,10 @@ class AppInfo {
   /// in Settings. Off: those accounts and goals are not Dex's.
   static const bool showUpstreamDonations = false;
 
+  /// Whether to show the original developer's remote announcement pop-ups
+  /// (their promotions and donation appeals). Off for Dex.
+  static const bool showUpstreamAnnouncements = false;
+
   /// Where "project" links go: Dex's repository, or the upstream project's
   /// page when Dex has none yet.
   static String get projectUrl => hasRepo ? githubUrl : upstreamUrl;
