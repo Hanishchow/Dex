@@ -208,7 +208,11 @@ class AppSliverHeader extends StatelessWidget {
             child: DexOrnament(
               DexArtwork.cornerFiligree,
               width: 300,
-              opacity: 0.2,
+              opacity: 0.32,
+              depth: 6,
+              sway: 0.012,
+              shimmer: true,
+              phase: 0.5,
               alignment: Alignment.topRight,
             ),
           ),

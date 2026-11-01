@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'dex_ornament.dart';
 import 'dex_tokens.dart';
 
 /// The one interactive wrapper for Dex surfaces: pointer cursor, a hover fill,
@@ -24,7 +25,11 @@ class DexPressable extends StatefulWidget {
     this.autofocus = false,
     this.semanticLabel,
     this.focusNode,
+    this.hoverArt,
   });
+
+  /// Gothic corners that appear on hover or keyboard focus.
+  final DexArtwork? hoverArt;
 
   final Widget child;
   final VoidCallback? onTap;
@@ -55,6 +60,35 @@ class _DexPressableState extends State<DexPressable> {
 
   void _setPressed(bool value) {
     if (_pressed != value) setState(() => _pressed = value);
+  }
+
+  /// With [DexPressable.hoverArt], two gothic corners fade in on hover or
+  /// focus: top-right and (mirrored) bottom-left.
+  Widget _withCorners(bool enabled) {
+    final art = widget.hoverArt;
+    if (art == null) return widget.child;
+    final shown = enabled && (_hovered || _focusVisible);
+    Widget corner({required bool far}) => AnimatedOpacity(
+      opacity: shown ? 1 : 0,
+      duration: DexMotion.hover,
+      curve: DexMotion.out,
+      child: DexOrnament(
+        art,
+        width: 96,
+        opacity: 0.55,
+        alignment: far ? Alignment.bottomLeft : Alignment.topRight,
+        flipX: far,
+        flipY: far,
+      ),
+    );
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        widget.child,
+        Positioned(top: -4, right: -4, child: corner(far: false)),
+        Positioned(bottom: -4, left: -4, child: corner(far: true)),
+      ],
+    );
   }
 
   @override
@@ -127,7 +161,7 @@ class _DexPressableState extends State<DexPressable> {
                 ),
                 child: Opacity(
                   opacity: enabled ? 1 : DexStates.disabledOpacity,
-                  child: widget.child,
+                  child: _withCorners(enabled),
                 ),
               ),
             ),

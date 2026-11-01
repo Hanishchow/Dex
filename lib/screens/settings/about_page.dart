@@ -326,7 +326,9 @@ class _AppHeaderCard extends StatelessWidget {
                 child: DexOrnament(
                   DexArtwork.figure,
                   height: 320,
-                  opacity: 0.5,
+                  opacity: 0.55,
+                  depth: 5,
+                  breathe: 0.25,
                   alignment: Alignment.centerRight,
                 ),
               ),

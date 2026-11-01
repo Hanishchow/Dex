@@ -3,6 +3,7 @@ import 'package:mornye/providers/explore_provider.dart';
 import 'package:mornye/widgets/cached_cover_image.dart';
 import 'package:mornye/utils/desktop_platform.dart';
 import 'package:mornye/widgets/desktop/desktop_scroll_arrows.dart';
+import 'package:mornye/widgets/dex/dex_ornament.dart';
 import 'package:mornye/widgets/dex/dex_pressable.dart';
 import 'package:mornye/widgets/audio_quality_badges.dart';
 
@@ -80,6 +81,7 @@ class ExploreFeaturedSection extends StatelessWidget {
                     return Builder(
                       builder: (itemContext) => DexPressable(
                         onTap: () => onItemTap(item, itemContext),
+                        hoverArt: DexArtwork.cornerFiligree,
                         borderRadius: BorderRadius.circular(12),
                         semanticLabel: item.name,
                         child: SizedBox(

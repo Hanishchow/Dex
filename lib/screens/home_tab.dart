@@ -1032,7 +1032,11 @@ class _HomeTabState extends ConsumerState<HomeTab>
               child: DexOrnament(
                 DexArtwork.lilyChandelier,
                 width: 360,
-                opacity: 0.16,
+                opacity: 0.26,
+                depth: 14,
+                breathe: 0.3,
+                sway: 0.015,
+                shimmer: true,
                 alignment: Alignment.topRight,
               ),
             ),

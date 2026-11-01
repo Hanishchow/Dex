@@ -52,7 +52,14 @@ class DexEmptyState extends StatelessWidget {
                 valueListenable: DexArt.level,
                 builder: (context, level, _) {
                   if (art != null && level != DexArtworkLevel.off) {
-                    return DexOrnament(art!, height: 220, opacity: 0.6);
+                    return DexOrnament(
+                      art!,
+                      height: 220,
+                      opacity: 0.7,
+                      depth: 8,
+                      breathe: 0.5,
+                      sway: 0.02,
+                    );
                   }
                   return ExcludeSemantics(
                     child: Text(

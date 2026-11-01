@@ -139,7 +139,10 @@ class _DesktopNowPlayingState extends ConsumerState<DesktopNowPlaying> {
                 child: DexOrnament(
                   DexArtwork.thornCrescent,
                   height: 680,
-                  opacity: 0.14,
+                  opacity: 0.26,
+                  depth: 18,
+                  breathe: 1.0,
+                  energyAware: true,
                 ),
               ),
             ),
@@ -152,7 +155,11 @@ class _DesktopNowPlayingState extends ConsumerState<DesktopNowPlaying> {
                         child: DexOrnament(
                           DexArtwork.glowCrosses,
                           height: 560,
-                          opacity: 0.3,
+                          opacity: 0.42,
+                          depth: 10,
+                          sway: 0.02,
+                          breathe: 0.6,
+                          energyAware: true,
                         ),
                       )
                     : const Align(
@@ -160,7 +167,8 @@ class _DesktopNowPlayingState extends ConsumerState<DesktopNowPlaying> {
                         child: DexOrnament(
                           DexArtwork.script,
                           height: 640,
-                          opacity: 0.08,
+                          opacity: 0.12,
+                          breathe: 0.3,
                         ),
                       ),
               ),

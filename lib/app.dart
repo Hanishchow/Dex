@@ -21,6 +21,7 @@ import 'package:mornye/widgets/app_snack_bar.dart';
 import 'package:mornye/widgets/desktop/desktop_shortcuts.dart';
 import 'package:mornye/widgets/desktop/library_drop_target.dart';
 import 'package:mornye/widgets/dex/dex_boot_splash.dart';
+import 'package:mornye/widgets/dex/dex_motion_field.dart';
 import 'package:mornye/widgets/dex/dex_ornament.dart';
 import 'package:mornye/widgets/dex_ascii_backdrop.dart';
 import 'package:mornye/widgets/mornye_glass_preparation.dart';
@@ -269,25 +270,27 @@ class MornyeApp extends ConsumerWidget {
             return MediaQuery(
               data: mediaQuery.copyWith(displayFeatures: const []),
               child: MornyeGlassPreparation(
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    AdaptiveUiScaler(child: appContent),
-                    const Positioned.fill(
-                      child: IgnorePointer(child: DexGothicBackdrop()),
-                    ),
-                    const Positioned.fill(
-                      child: IgnorePointer(child: DexAsciiBackdrop()),
-                    ),
-                    Positioned.fill(
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: dexBootFinished,
-                        builder: (context, done, _) => done
-                            ? const SizedBox.shrink()
-                            : const DexBootSplash(),
+                child: DexMotionHost(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      AdaptiveUiScaler(child: appContent),
+                      const Positioned.fill(
+                        child: IgnorePointer(child: DexGothicBackdrop()),
                       ),
-                    ),
-                  ],
+                      const Positioned.fill(
+                        child: IgnorePointer(child: DexAsciiBackdrop()),
+                      ),
+                      Positioned.fill(
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: dexBootFinished,
+                          builder: (context, done, _) => done
+                              ? const SizedBox.shrink()
+                              : const DexBootSplash(),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

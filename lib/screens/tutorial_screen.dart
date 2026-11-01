@@ -827,7 +827,14 @@ class _TutorialPage extends StatelessWidget {
           ? Icon(icon, size: 56, color: colorScheme.primary)
           : Padding(
               padding: const EdgeInsets.all(12),
-              child: DexOrnament(art, height: 96, opacity: 0.9),
+              child: DexOrnament(
+                art,
+                height: 96,
+                opacity: 0.9,
+                depth: 8,
+                sway: 0.02,
+                breathe: 0.3,
+              ),
             ),
     );
   }

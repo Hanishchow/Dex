@@ -570,7 +570,11 @@ class DesktopNavigationRail extends StatelessWidget {
                       child: DexOrnament(
                         DexArtwork.sword,
                         height: 380,
-                        opacity: 0.16,
+                        opacity: 0.26,
+                        depth: 7,
+                        breathe: 0.35,
+                        shimmer: true,
+                        phase: 0.2,
                       ),
                     ),
                   ),

@@ -112,7 +112,8 @@ class AppDialogSurface extends StatelessWidget {
               child: DexOrnament(
                 DexArtwork.cornerFiligree,
                 width: 150,
-                opacity: 0.16,
+                opacity: 0.28,
+                sway: 0.01,
                 alignment: Alignment.topRight,
               ),
             ),

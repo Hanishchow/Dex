@@ -24,7 +24,7 @@ ASSETS = {
     "script": (8, "ink", 30, 0.3, 1000, True, 0),
     "corner_filigree": (10, "ink", 30, 0.3, 1000, True, 0),
     "cross_crescent": (11, "ink", 30, 0.3, 1100, True, 0),
-    "thorn_crescent": (12, "light", 25, 0.3, 1200, True, 0),
+    "thorn_crescent": (12, "light", 60, 0.3, 1200, True, 0),
     "glow_crosses": (13, "light", 55, 0.3, 1400, False, 0),
     "grunge_stars": (14, "light", 2, 0.5, 1000, False, 0),
     "halftone_clouds": (15, "light", 2, 0.5, 1100, False, 0),

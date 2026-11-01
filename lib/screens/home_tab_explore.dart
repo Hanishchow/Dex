@@ -199,6 +199,7 @@ extension _HomeTabExploreUI on _HomeTabState {
       label: context.l10n.a11yOpenItem(item.type, item.name),
       child: DexPressable(
         onTap: () => _navigateToExploreItem(item, itemContext),
+        hoverArt: DexArtwork.cornerFiligree,
         borderRadius: BorderRadius.circular(12),
         child: SizedBox(
           width: cardSize,
