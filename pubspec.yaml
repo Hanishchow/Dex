@@ -215,6 +215,9 @@ flutter:
     - family: Cinzel
       fonts:
         - asset: assets/fonts/Cinzel.ttf
+    - family: Jacquard24
+      fonts:
+        - asset: assets/fonts/Jacquard24-Regular.ttf
     - family: UnifrakturCook
       fonts:
         - asset: assets/fonts/UnifrakturCook-Bold.ttf

@@ -123,8 +123,9 @@ class _PlaybackSeekSliderState extends State<PlaybackSeekSlider> {
                   SliderTheme.of(context).inactiveTrackColor ?? Colors.white12,
               value: enabled ? currentMs : 0,
               max: maxMs,
+              star: true,
               trackHeight: widget.hairline ? 2 : 6,
-              height: widget.hairline ? 10 : 44,
+              height: widget.hairline ? 20 : 44,
               inset: widget.hairline || widget.edgeAligned
                   ? 0
                   : MornyePlayerSlider.horizontalInset,

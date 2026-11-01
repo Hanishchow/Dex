@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 const bool dexCustomColors = false;
 
 const String dexHeadingFont = 'Cinzel';
-const String dexBlackletterFont = 'UnifrakturCook';
+const String dexBlackletterFont = 'Jacquard24';
 
 /// The Dex palette as a complete [ColorScheme]. Feed this to the app theme
 /// builders so every component theme (tabs, sliders, switches, progress) is
@@ -33,11 +33,20 @@ ThemeData applyDexGothic(ThemeData theme) {
   TextStyle? heading(TextStyle? style, {double spacing = 0.6}) =>
       style?.copyWith(fontFamily: dexHeadingFont, letterSpacing: spacing);
 
+  // Jacquard 24 is a pixel blackletter with a small body, so it is used only
+  // for the large display sizes and is scaled up to match Cinzel's weight.
+  TextStyle? sigil(TextStyle? style) => style?.copyWith(
+    fontFamily: dexBlackletterFont,
+    letterSpacing: 0.4,
+    fontSize: style.fontSize == null ? null : style.fontSize! * 1.3,
+    fontWeight: FontWeight.w400,
+  );
+
   TextTheme headings(TextTheme t) => t.copyWith(
-    displayLarge: heading(t.displayLarge),
-    displayMedium: heading(t.displayMedium),
-    displaySmall: heading(t.displaySmall),
-    headlineLarge: heading(t.headlineLarge),
+    displayLarge: sigil(t.displayLarge),
+    displayMedium: sigil(t.displayMedium),
+    displaySmall: sigil(t.displaySmall),
+    headlineLarge: sigil(t.headlineLarge),
     headlineMedium: heading(t.headlineMedium),
     headlineSmall: heading(t.headlineSmall),
     titleLarge: heading(t.titleLarge, spacing: 0.8),

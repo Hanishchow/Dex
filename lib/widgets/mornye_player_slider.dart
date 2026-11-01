@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mornye/widgets/dex/dex_seek_star.dart';
 
 /// A continuous player track with no thumb in either gesture state.
 class MornyePlayerSlider extends StatelessWidget {
@@ -16,7 +17,11 @@ class MornyePlayerSlider extends StatelessWidget {
     this.trackHeight = 6,
     this.height = 44,
     this.inset = horizontalInset,
+    this.star = false,
   });
+
+  /// Dex: the thumb is a glowing, twinkling star instead of nothing.
+  final bool star;
 
   /// The track thickness; the desktop capsule uses a hairline, as Music.
   final double trackHeight;
@@ -36,14 +41,17 @@ class MornyePlayerSlider extends StatelessWidget {
   final ValueChanged<double>? onChangeEnd;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
+  Widget build(BuildContext context) {
+    final slider = SizedBox(
     height: height,
     child: SliderTheme(
       data: SliderTheme.of(context).copyWith(
         trackHeight: trackHeight,
         trackGap: 0,
         trackShape: const RoundedRectSliderTrackShape(),
-        thumbShape: SliderComponentShape.noThumb,
+        thumbShape: star
+            ? const DexStarThumbShape()
+            : SliderComponentShape.noThumb,
         overlayShape: SliderComponentShape.noOverlay,
         showValueIndicator: ShowValueIndicator.never,
       ),
@@ -58,5 +66,7 @@ class MornyePlayerSlider extends StatelessWidget {
         onChangeEnd: onChangeEnd,
       ),
     ),
-  );
+    );
+    return star ? DexMotionRepaint(child: slider) : slider;
+  }
 }

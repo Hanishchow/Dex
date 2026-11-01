@@ -72,7 +72,16 @@ class _DexMotionHostState extends ConsumerState<DexMotionHost>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _focused = state == AppLifecycleState.resumed;
+    // Losing focus keeps the window on screen, so it keeps moving; only a
+    // minimised or hidden window stops.
+    final visible =
+        state == AppLifecycleState.resumed ||
+        state == AppLifecycleState.inactive;
+    if (!visible && _focused) {
+      // Free decoded artwork while nothing can be seen; it reloads on return.
+      PaintingBinding.instance.imageCache.clear();
+    }
+    _focused = visible;
     _sync();
   }
 

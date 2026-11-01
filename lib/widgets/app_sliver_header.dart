@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mornye/theme/dex_gothic.dart';
 import 'package:mornye/theme/app_tokens.dart';
 import 'package:mornye/theme/mornye_theme.dart';
 import 'package:mornye/widgets/dex/dex_ornament.dart';
@@ -178,11 +179,11 @@ class AppSliverHeader extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: context.isMornye
-                          ? -0.7 * expandRatio
-                          : null,
+                      // Dex: Jacquard 24 has a small body, so it is scaled up.
+                      fontFamily: dexBlackletterFont,
+                      fontSize: fontSize * 1.3,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.5,
                       color: colorScheme.onSurface,
                     ),
                   ),

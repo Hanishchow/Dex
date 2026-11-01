@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_3_expressive/components/sliders/components/m3e_slider_track_painter.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:mornye/widgets/dex/dex_seek_star.dart';
 
 /// Expressive track motion around the native slider's seeking and accessibility.
 class ExpressiveSeekTrack extends StatefulWidget {
@@ -83,10 +84,9 @@ class _ExpressiveSeekTrackState extends State<ExpressiveSeekTrack>
         data: SliderTheme.of(context).copyWith(
           trackHeight: 4,
           trackShape: _trackShape,
-          thumbShape: const HandleThumbShape(),
-          thumbSize: const WidgetStatePropertyAll(Size(4, 24)),
+          thumbShape: const DexStarThumbShape(),
         ),
-        child: widget.child,
+        child: DexMotionRepaint(child: widget.child),
       ),
     ),
   );
