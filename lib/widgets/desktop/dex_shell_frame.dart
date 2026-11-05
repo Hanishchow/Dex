@@ -131,7 +131,22 @@ class DexShellFrame extends StatelessWidget {
 /// Lets pages sit on the glass: their scaffold is clear and their surface
 /// matches the panel's mid tone, so no flat black slab shows inside it.
 Widget _glassTheme(BuildContext context, Widget child) {
-  final theme = Theme.of(context);
+  var theme = Theme.of(context);
+  // The panel is always dark, so a light app theme is switched to the dark
+  // Dex palette inside it; otherwise dark text would sit on dark glass.
+  if (theme.brightness == Brightness.light) {
+    final dark = dexColorScheme(Brightness.dark);
+    theme = theme.copyWith(
+      colorScheme: dark,
+      textTheme: theme.textTheme.apply(
+        bodyColor: dark.onSurface,
+        displayColor: dark.onSurface,
+      ),
+      iconTheme: theme.iconTheme.copyWith(color: dark.onSurface),
+      dividerColor: dark.outlineVariant,
+      cardColor: dark.surfaceContainer,
+    );
+  }
   return Theme(
     data: theme.copyWith(
       scaffoldBackgroundColor: Colors.transparent,
