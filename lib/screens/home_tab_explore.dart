@@ -9,7 +9,9 @@ extension _HomeTabExploreUI on _HomeTabState {
     final hasGreeting =
         !context.isMornye && greeting != null && greeting.isNotEmpty;
     final isTablet = MediaQuery.sizeOf(context).shortestSide >= 600;
-    final sectionOffset = hasGreeting ? 1 : 0;
+    final showDeck = dexFloatingFrame && sections.isNotEmpty;
+    final deckIndex = hasGreeting ? 1 : 0;
+    final sectionOffset = (hasGreeting ? 1 : 0) + (showDeck ? 1 : 0);
     final totalCount = sections.length + sectionOffset + 1;
 
     return [
@@ -31,6 +33,13 @@ extension _HomeTabExploreUI on _HomeTabState {
                             : Theme.of(context).textTheme.headlineSmall)
                         ?.copyWith(fontWeight: FontWeight.bold),
               ),
+            );
+          }
+
+          if (showDeck && index == deckIndex) {
+            return DexHomeDeck(
+              sections: sections,
+              onItemTap: _navigateToExploreItem,
             );
           }
 
