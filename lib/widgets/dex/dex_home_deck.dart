@@ -5,6 +5,7 @@ import 'package:mornye/providers/explore_provider.dart';
 import 'package:mornye/utils/string_utils.dart';
 import 'package:mornye/widgets/cached_cover_image.dart';
 import 'package:mornye/widgets/dex/dex_pressable.dart';
+import 'package:mornye/widgets/desktop/dex_shell_frame.dart';
 
 const _bone = Color(0xFFF2F2F2);
 const _ink = Color(0xFF0A0A0A);
@@ -38,7 +39,8 @@ class DexHomeDeck extends StatelessWidget {
     final fan = fanSection.items.where(_hasCover).take(3).toList();
     final rowSection =
         plain.cast<ExploreSection?>().firstWhere(
-          (s) => s != fanSection && s!.isYTMusicQuickPicks && s.items.isNotEmpty,
+          (s) =>
+              s != fanSection && s!.isYTMusicQuickPicks && s.items.isNotEmpty,
           orElse: () => null,
         ) ??
         plain.cast<ExploreSection?>().firstWhere(
@@ -46,6 +48,9 @@ class DexHomeDeck extends StatelessWidget {
           orElse: () => null,
         );
     final rows = rowSection?.items.take(5).toList() ?? const <ExploreItem>[];
+    final metrics = DexPanelScope.maybeOf(context);
+    final fanHeight = metrics?.fanHeight ?? 250.0;
+    final rowHeight = metrics?.rowHeight ?? 62.0;
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 560) return const SizedBox.shrink();
@@ -54,12 +59,13 @@ class DexHomeDeck extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _CardFan(items: fan, onItemTap: onItemTap),
+              _CardFan(items: fan, onItemTap: onItemTap, fanHeight: fanHeight),
               const SizedBox(height: 12),
               for (var i = 0; i < rows.length; i++)
                 DexTrackRow(
                   item: rows[i],
                   highlighted: i == 0,
+                  height: rowHeight,
                   onTap: (ctx) => onItemTap(rows[i], ctx),
                 ),
             ],
@@ -71,13 +77,20 @@ class DexHomeDeck extends StatelessWidget {
 }
 
 class _CardFan extends StatelessWidget {
-  const _CardFan({required this.items, required this.onItemTap});
+  const _CardFan({
+    required this.items,
+    required this.onItemTap,
+    required this.fanHeight,
+  });
 
   final List<ExploreItem> items;
   final void Function(ExploreItem item, BuildContext context) onItemTap;
 
-  static const double _cardWidth = 176;
-  static const double _height = 250;
+  double get _cardWidth => fanHeight * 0.70;
+  double get _height => fanHeight;
+
+  /// 37.7% of the panel height, from the wireframe.
+  final double fanHeight;
   static const _tilts = [-0.07, 0.015, 0.10];
   static const _lifts = [14.0, 0.0, 18.0];
 
@@ -215,8 +228,10 @@ class _DashedLine extends StatelessWidget {
   const _DashedLine();
 
   @override
-  Widget build(BuildContext context) =>
-      CustomPaint(size: const Size(double.infinity, 3), painter: _DashPainter());
+  Widget build(BuildContext context) => CustomPaint(
+    size: const Size(double.infinity, 3),
+    painter: _DashPainter(),
+  );
 }
 
 class _DashPainter extends CustomPainter {
@@ -247,8 +262,10 @@ class DexTrackRow extends StatelessWidget {
     required this.item,
     required this.onTap,
     this.highlighted = false,
+    this.height = 62,
   });
 
+  final double height;
   final ExploreItem item;
   final void Function(BuildContext context) onTap;
   final bool highlighted;
@@ -267,64 +284,73 @@ class DexTrackRow extends StatelessWidget {
             color: highlighted ? const Color(0x14FFFFFF) : Colors.transparent,
             borderRadius: BorderRadius.circular(18),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Row(
-              children: [
-                ClipOval(
-                  child: SizedBox.square(
-                    dimension: 46,
-                    child: DexHomeDeck._hasCover(item)
-                        ? CachedCoverImage(
-                            imageUrl: item.coverUrl!,
-                            memCacheWidth: 120,
-                          )
-                        : const ColoredBox(
-                            color: _chip,
-                            child: Icon(Icons.music_note, color: _muted),
-                          ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: _bone,
-                        ),
-                      ),
-                      Text(
-                        item.artists,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12, color: _muted),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 52,
-                  child: Text(
-                    seconds > 0 ? formatClock(seconds) : '–',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: _muted,
-                      fontFeatures: [FontFeature.tabularFigures()],
+          child: SizedBox(
+            height: height - 4,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                children: [
+                  ClipOval(
+                    child: SizedBox.square(
+                      dimension: 46,
+                      child: DexHomeDeck._hasCover(item)
+                          ? CachedCoverImage(
+                              imageUrl: item.coverUrl!,
+                              memCacheWidth: 120,
+                            )
+                          : const ColoredBox(
+                              color: _chip,
+                              child: Icon(Icons.music_note, color: _muted),
+                            ),
                     ),
                   ),
-                ),
-                _RoundAction(icon: Icons.play_arrow, onTap: () => onTap(context)),
-                const SizedBox(width: 8),
-                _RoundAction(icon: Icons.more_horiz, onTap: () => onTap(context)),
-              ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: _bone,
+                          ),
+                        ),
+                        Text(
+                          item.artists,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12, color: _muted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    width: 52,
+                    child: Text(
+                      seconds > 0 ? formatClock(seconds) : '–',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: _muted,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ),
+                  _RoundAction(
+                    icon: Icons.play_arrow,
+                    onTap: () => onTap(context),
+                  ),
+                  const SizedBox(width: 8),
+                  _RoundAction(
+                    icon: Icons.more_horiz,
+                    onTap: () => onTap(context),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

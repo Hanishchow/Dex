@@ -5,6 +5,7 @@ import 'package:mornye/providers/music_player_provider.dart';
 import 'package:mornye/utils/string_utils.dart';
 import 'package:mornye/widgets/cached_cover_image.dart';
 import 'package:mornye/widgets/desktop/desktop_inspector.dart';
+import 'package:mornye/widgets/desktop/dex_shell_frame.dart';
 import 'package:mornye/widgets/playback_seek_slider.dart';
 
 const _bone = Color(0xFFF2F2F2);
@@ -27,9 +28,21 @@ class DexNowPlayingSlot extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final item = ref.watch(currentMediaItemProvider).value;
     if (item == null) return const SizedBox.shrink();
+    final m = DexPanelScope.maybeOf(context);
+    // Sized from the wireframe's ratios of the glass panel; the page area
+    // above already starts [DexPanelMetrics.contentTop] below the panel top.
+    final top = m == null ? 8.0 : (m.cardTop - m.contentTop).clamp(0.0, 400.0);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 8, 16, 16),
-      child: SizedBox(width: _cardWidth, child: DexNowPlayingCard(item: item)),
+      padding: EdgeInsets.fromLTRB(
+        4,
+        top,
+        m?.cardRightInset ?? 16,
+        m?.cardBottomInset ?? 16,
+      ),
+      child: SizedBox(
+        width: m?.cardWidth ?? _cardWidth,
+        child: DexNowPlayingCard(item: item),
+      ),
     );
   }
 }
@@ -84,19 +97,24 @@ class DexNowPlayingCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              AspectRatio(
-                aspectRatio: 1,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(22),
-                  child: art == null
-                      ? const ColoredBox(
-                          color: _chip,
-                          child: Icon(Icons.music_note, color: _muted, size: 48),
-                        )
-                      : CachedCoverImage(
-                          imageUrl: art,
-                          memCacheWidth: 600,
-                        ),
+              Flexible(
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(22),
+                      child: art == null
+                          ? const ColoredBox(
+                              color: _chip,
+                              child: Icon(
+                                Icons.music_note,
+                                color: _muted,
+                                size: 48,
+                              ),
+                            )
+                          : CachedCoverImage(imageUrl: art, memCacheWidth: 600),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -169,7 +187,8 @@ class _Progress extends ConsumerWidget {
     final duration = item.duration ?? Duration.zero;
     final position = ref.watch(playbackPositionProvider);
     final playing =
-        ref.watch(playbackPlayingProvider) && !ref.watch(playbackLoadingProvider);
+        ref.watch(playbackPlayingProvider) &&
+        !ref.watch(playbackLoadingProvider);
     final elapsed = position.inSeconds.clamp(0, duration.inSeconds);
     const timeStyle = TextStyle(
       fontSize: 11,
@@ -324,8 +343,14 @@ Path _notchedPath(Size size) {
     ..moveTo(0, r)
     ..quadraticBezierTo(0, 0, r, 0)
     ..lineTo(notchStart, 0)
-    ..cubicTo(notchStart + curve, 0, notchStart + curve * 0.4, depth,
-        notchStart + curve * 1.6, depth)
+    ..cubicTo(
+      notchStart + curve,
+      0,
+      notchStart + curve * 0.4,
+      depth,
+      notchStart + curve * 1.6,
+      depth,
+    )
     ..lineTo(notchEnd - curve * 1.6, depth)
     ..cubicTo(notchEnd - curve * 0.4, depth, notchEnd - curve, 0, notchEnd, 0)
     ..lineTo(w - r, 0)
