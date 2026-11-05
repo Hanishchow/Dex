@@ -19,6 +19,7 @@ import 'package:mornye/widgets/desktop/desktop_commands.dart';
 import 'package:mornye/widgets/desktop/desktop_inspector.dart';
 import 'package:mornye/widgets/desktop/desktop_now_playing.dart';
 import 'package:mornye/widgets/desktop/desktop_player_bar.dart';
+import 'package:mornye/widgets/desktop/dex_shell_frame.dart';
 import 'package:mornye/widgets/desktop/desktop_window.dart';
 import 'package:mornye/widgets/profile_avatar.dart';
 import 'package:mornye/widgets/no_scrollbars.dart';
@@ -247,6 +248,23 @@ class DesktopShellLayout extends StatelessWidget {
 
   Widget _shell(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
+    if (dexFloatingFrame) {
+      final mornye = context.isMornye;
+      return DexShellFrame(
+        destinations: destinations,
+        selected: selected,
+        onSelected: onSelected,
+        // Mornye floats its player inside the panel; Material docks it.
+        playerBar: mornye ? null : playerBar,
+        content: _DesktopContentArea(
+          key: const ValueKey('desktop-content'),
+          overlayInspector: desktopInspectorOverlays(width),
+          body: body,
+          floatingPlayer: mornye ? playerBar : null,
+          titleBarDrag: true,
+        ),
+      );
+    }
     if (context.isMornye) {
       // The sidebar always shows; the page background shows around the
       // inset panel.
@@ -363,6 +381,7 @@ class _PaneMediaQuery extends StatelessWidget {
 /// no shell search bar above them.
 class _DesktopContentArea extends StatelessWidget {
   const _DesktopContentArea({
+    super.key,
     required this.overlayInspector,
     required this.body,
     this.floatingPlayer,

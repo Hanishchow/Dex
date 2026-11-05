@@ -666,6 +666,13 @@ class _MornyeLcdLines extends StatelessWidget {
   }
 }
 
+/// One compact size for every trailing icon button, so the row is evenly
+/// spaced instead of each button adding its own padding.
+const kDesktopTrailingButtonSize = BoxConstraints.tightFor(
+  width: 40,
+  height: 40,
+);
+
 /// Lyrics and Up Next, which toggle the trailing inspector, downloads, and
 /// volume. Material fills its third of the bar, with downloads after Up
 /// Next and the volume slider last. The Mornye capsule leads with downloads
@@ -735,6 +742,8 @@ class _TrailingControls extends StatelessWidget {
               DesktopCommand.miniPlayer,
             ),
             color: mornye ? colorScheme.onSurface : null,
+            padding: EdgeInsets.zero,
+            constraints: kDesktopTrailingButtonSize,
             icon: AppIcon(
               mornye
                   ? CupertinoIcons.rectangle_on_rectangle
@@ -851,6 +860,8 @@ class _InspectorToggle extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return AppIconButton(
       tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: kDesktopTrailingButtonSize,
       isSelected: selected,
       color: mornye
           ? (selected ? colorScheme.primary : colorScheme.onSurface)

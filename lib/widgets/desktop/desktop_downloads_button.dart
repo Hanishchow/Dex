@@ -93,6 +93,8 @@ class _DesktopDownloadsButtonState
           key: const ValueKey('desktop-downloads-button'),
           tooltip: label,
           color: mornye ? colorScheme.onSurface : null,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints.tightFor(width: 40, height: 40),
           onPressed: _toggle,
           // Mornye sizes it with the other glyphs in the player capsule.
           icon: SizedBox.square(
