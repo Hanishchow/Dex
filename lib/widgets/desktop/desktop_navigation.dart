@@ -19,6 +19,7 @@ import 'package:mornye/widgets/desktop/desktop_commands.dart';
 import 'package:mornye/widgets/desktop/desktop_inspector.dart';
 import 'package:mornye/widgets/desktop/desktop_now_playing.dart';
 import 'package:mornye/widgets/desktop/desktop_player_bar.dart';
+import 'package:mornye/widgets/desktop/dex_now_playing_card.dart';
 import 'package:mornye/widgets/desktop/dex_shell_frame.dart';
 import 'package:mornye/widgets/desktop/desktop_window.dart';
 import 'package:mornye/widgets/profile_avatar.dart';
@@ -463,6 +464,13 @@ class _DesktopContentArea extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(child: content),
+            // The Dex frame keeps now-playing beside the page while the
+            // inspector is closed.
+            if (dexFloatingFrame &&
+                panel == null &&
+                MediaQuery.sizeOf(context).width >=
+                    dexNowPlayingCardBreakpoint)
+              const DexNowPlayingSlot(),
             DesktopInspectorTransition(
               key: const ValueKey('desktop-inspector-beside'),
               panel: overlayInspector ? null : panel,
