@@ -279,6 +279,7 @@ class DexTrackRow extends StatelessWidget {
         onTap: () => onTap(context),
         borderRadius: BorderRadius.circular(18),
         pressScale: false,
+        hoverLift: false,
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: highlighted ? const Color(0x14FFFFFF) : Colors.transparent,

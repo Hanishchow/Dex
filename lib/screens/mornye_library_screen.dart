@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mornye/widgets/dex/dex_hover_lift.dart';
 import 'package:mornye/l10n/l10n.dart';
 import 'package:mornye/providers/download_queue_provider.dart';
 import 'package:mornye/providers/library_browse_provider.dart';
@@ -593,7 +594,7 @@ class _MornyeLibraryScreenState extends ConsumerState<MornyeLibraryScreen> {
                           return DesktopContextMenuRegion(
                             onContextMenu: (position) =>
                                 _showAlbumMenu(entry, position),
-                            child: _buildAlbumTile(entry, colors),
+                            child: DexHoverLift(child: _buildAlbumTile(entry, colors)),
                           );
                         },
                       );

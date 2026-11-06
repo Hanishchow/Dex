@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'dex_hover_lift.dart';
 import 'dex_ornament.dart';
 import 'dex_tokens.dart';
 
@@ -26,7 +27,12 @@ class DexPressable extends StatefulWidget {
     this.semanticLabel,
     this.focusNode,
     this.hoverArt,
+    this.hoverLift = true,
   });
+
+  /// Float up a few pixels on hover, like a physical card. Turn off for
+  /// full-width rows.
+  final bool hoverLift;
 
   /// Gothic corners that appear on hover or keyboard focus.
   final DexArtwork? hoverArt;
@@ -109,59 +115,63 @@ class _DexPressableState extends State<DexPressable> {
         ? DexStates.pressScale
         : 1.0;
 
-    return Semantics(
-      button: enabled,
-      selected: widget.selected,
-      label: widget.semanticLabel,
-      child: FocusableActionDetector(
-        enabled: enabled,
-        autofocus: widget.autofocus,
-        focusNode: widget.focusNode,
-        mouseCursor: enabled
-            ? SystemMouseCursors.click
-            : SystemMouseCursors.basic,
-        onShowHoverHighlight: (v) => setState(() => _hovered = v),
-        onShowFocusHighlight: (v) => setState(() => _focusVisible = v),
-        shortcuts: const {
-          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
-          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
-        },
-        actions: {
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (_) {
-              widget.onTap?.call();
-              return null;
-            },
-          ),
-        },
-        child: Listener(
-          onPointerDown: (e) {
-            if (enabled && e.buttons == kPrimaryButton) _setPressed(true);
+    return DexHoverLift(
+      enabled: enabled && widget.hoverLift,
+      borderRadius: widget.borderRadius,
+      child: Semantics(
+        button: enabled,
+        selected: widget.selected,
+        label: widget.semanticLabel,
+        child: FocusableActionDetector(
+          enabled: enabled,
+          autofocus: widget.autofocus,
+          focusNode: widget.focusNode,
+          mouseCursor: enabled
+              ? SystemMouseCursors.click
+              : SystemMouseCursors.basic,
+          onShowHoverHighlight: (v) => setState(() => _hovered = v),
+          onShowFocusHighlight: (v) => setState(() => _focusVisible = v),
+          shortcuts: const {
+            SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+            SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
           },
-          onPointerUp: (_) => _setPressed(false),
-          onPointerCancel: (_) => _setPressed(false),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: widget.onTap,
-            onDoubleTap: widget.onDoubleTap,
-            onSecondaryTap: widget.onSecondaryTap,
-            child: AnimatedScale(
-              scale: scale,
-              duration: reduce ? Duration.zero : DexMotion.press,
-              curve: DexMotion.out,
-              child: AnimatedContainer(
-                duration: reduce ? Duration.zero : DexMotion.hover,
+          actions: {
+            ActivateIntent: CallbackAction<ActivateIntent>(
+              onInvoke: (_) {
+                widget.onTap?.call();
+                return null;
+              },
+            ),
+          },
+          child: Listener(
+            onPointerDown: (e) {
+              if (enabled && e.buttons == kPrimaryButton) _setPressed(true);
+            },
+            onPointerUp: (_) => _setPressed(false),
+            onPointerCancel: (_) => _setPressed(false),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: widget.onTap,
+              onDoubleTap: widget.onDoubleTap,
+              onSecondaryTap: widget.onSecondaryTap,
+              child: AnimatedScale(
+                scale: scale,
+                duration: reduce ? Duration.zero : DexMotion.press,
                 curve: DexMotion.out,
-                foregroundDecoration: BoxDecoration(
-                  borderRadius: widget.borderRadius,
-                  color: fg.withValues(alpha: overlay),
-                  border: _focusVisible
-                      ? Border.all(color: fg, width: DexStates.focusRing)
-                      : null,
-                ),
-                child: Opacity(
-                  opacity: enabled ? 1 : DexStates.disabledOpacity,
-                  child: _withCorners(enabled),
+                child: AnimatedContainer(
+                  duration: reduce ? Duration.zero : DexMotion.hover,
+                  curve: DexMotion.out,
+                  foregroundDecoration: BoxDecoration(
+                    borderRadius: widget.borderRadius,
+                    color: fg.withValues(alpha: overlay),
+                    border: _focusVisible
+                        ? Border.all(color: fg, width: DexStates.focusRing)
+                        : null,
+                  ),
+                  child: Opacity(
+                    opacity: enabled ? 1 : DexStates.disabledOpacity,
+                    child: _withCorners(enabled),
+                  ),
                 ),
               ),
             ),

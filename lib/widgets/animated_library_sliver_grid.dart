@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
+import 'package:mornye/widgets/dex/dex_hover_lift.dart';
 
 class AnimatedLibrarySliverGrid extends StatefulWidget {
   final double maxCrossAxisExtent;
@@ -113,6 +114,6 @@ class _AnimatedLibrarySliverGridState extends State<AnimatedLibrarySliverGrid>
       crossAxisSpacing: widget.crossAxisSpacing,
       childAspectRatio: widget.childAspectRatio,
     ),
-    delegate: widget.delegate,
+    delegate: DexLiftDelegate(widget.delegate),
   );
 }
