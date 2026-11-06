@@ -1,12 +1,23 @@
+import 'dart:async';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mornye/controllers/player_metadata_controller.dart';
 import 'package:mornye/providers/music_player_provider.dart';
+import 'package:mornye/utils/playback_seek_preview.dart';
 import 'package:mornye/utils/string_utils.dart';
 import 'package:mornye/widgets/cached_cover_image.dart';
+import 'package:mornye/widgets/desktop/desktop_downloads_button.dart';
 import 'package:mornye/widgets/desktop/desktop_inspector.dart';
+import 'package:mornye/widgets/desktop/desktop_player_bar.dart'
+    show toggleDesktopMiniPlayer;
+import 'package:mornye/widgets/desktop/desktop_window.dart'
+    show desktopMiniPlayerSupported;
 import 'package:mornye/widgets/desktop/dex_shell_frame.dart';
 import 'package:mornye/widgets/playback_seek_slider.dart';
+import 'package:mornye/widgets/player_lyrics_section.dart';
+import 'package:mornye/widgets/player_volume_control.dart';
 
 const _bone = Color(0xFFF2F2F2);
 const _ink = Color(0xFF0A0A0A);
@@ -47,13 +58,21 @@ class DexNowPlayingSlot extends ConsumerWidget {
   }
 }
 
-class DexNowPlayingCard extends ConsumerWidget {
+class DexNowPlayingCard extends ConsumerStatefulWidget {
   const DexNowPlayingCard({super.key, required this.item});
 
   final MediaItem item;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DexNowPlayingCard> createState() => _DexNowPlayingCardState();
+}
+
+class _DexNowPlayingCardState extends ConsumerState<DexNowPlayingCard> {
+  bool _lyrics = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.item;
     final art = item.artUri?.toString();
     return CustomPaint(
       painter: const _NotchedCardPainter(),
@@ -84,8 +103,8 @@ class DexNowPlayingCard extends ConsumerWidget {
                     _RoundChip(
                       icon: Icons.lyrics_outlined,
                       tooltip: 'Lyrics',
-                      onTap: () =>
-                          toggleDesktopInspector(DesktopInspectorPanel.lyrics),
+                      selected: _lyrics,
+                      onTap: () => setState(() => _lyrics = !_lyrics),
                     ),
                     const SizedBox(width: 8),
                     _RoundChip(
@@ -98,24 +117,29 @@ class DexNowPlayingCard extends ConsumerWidget {
                 ),
               ),
               Flexible(
-                child: Center(
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(22),
-                      child: art == null
-                          ? const ColoredBox(
-                              color: _chip,
-                              child: Icon(
-                                Icons.music_note,
-                                color: _muted,
-                                size: 48,
-                              ),
-                            )
-                          : CachedCoverImage(imageUrl: art, memCacheWidth: 600),
-                    ),
-                  ),
-                ),
+                child: _lyrics
+                    ? const ClipRect(child: _CardLyrics())
+                    : Center(
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(22),
+                            child: art == null
+                                ? const ColoredBox(
+                                    color: _chip,
+                                    child: Icon(
+                                      Icons.music_note,
+                                      color: _muted,
+                                      size: 48,
+                                    ),
+                                  )
+                                : CachedCoverImage(
+                                    imageUrl: art,
+                                    memCacheWidth: 600,
+                                  ),
+                          ),
+                        ),
+                      ),
               ),
               const SizedBox(height: 20),
               Text(
@@ -140,6 +164,8 @@ class DexNowPlayingCard extends ConsumerWidget {
               _Progress(item: item),
               const SizedBox(height: 10),
               const _TransportRow(),
+              const SizedBox(height: 10),
+              const _UtilityRow(),
             ],
           ),
         ),
@@ -153,24 +179,26 @@ class _RoundChip extends StatelessWidget {
     required this.icon,
     required this.tooltip,
     required this.onTap,
+    this.selected = false,
   });
 
   final IconData icon;
   final String tooltip;
   final VoidCallback onTap;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) => Tooltip(
     message: tooltip,
     child: Material(
-      color: _chip,
+      color: selected ? _bone : _chip,
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: SizedBox.square(
           dimension: 34,
-          child: Icon(icon, size: 17, color: _bone),
+          child: Icon(icon, size: 17, color: selected ? _ink : _bone),
         ),
       ),
     ),
@@ -399,4 +427,66 @@ class _NotchedCardPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_NotchedCardPainter oldDelegate) => false;
+}
+
+/// Volume, mini player and downloads: what the docked bar used to carry.
+class _UtilityRow extends StatelessWidget {
+  const _UtilityRow();
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      const Expanded(child: PlayerVolumeControl(foreground: _bone)),
+      if (desktopMiniPlayerSupported)
+        _RoundChip(
+          icon: Icons.picture_in_picture_alt_outlined,
+          tooltip: 'Mini player',
+          onTap: () => unawaited(toggleDesktopMiniPlayer()),
+        ),
+      const SizedBox(width: 6),
+      const DesktopDownloadsButton(),
+    ],
+  );
+}
+
+/// The live lyrics, in the space the cover normally fills.
+class _CardLyrics extends ConsumerStatefulWidget {
+  const _CardLyrics();
+
+  @override
+  ConsumerState<_CardLyrics> createState() => _CardLyricsState();
+}
+
+class _CardLyricsState extends ConsumerState<_CardLyrics> {
+  final _metadata = PlayerMetadataController();
+  final _seekPreview = PlaybackSeekPreview();
+  ProviderSubscription<AsyncValue<MediaItem?>>? _sub;
+
+  @override
+  void initState() {
+    super.initState();
+    _sub = ref.listenManual<AsyncValue<MediaItem?>>(currentMediaItemProvider, (
+      previous,
+      next,
+    ) {
+      if (previous?.value?.id == next.value?.id) return;
+      unawaited(_metadata.load(next.value, inspectUnresolvedContentUri: true));
+    }, fireImmediately: true);
+  }
+
+  @override
+  void dispose() {
+    _sub?.close();
+    _metadata.dispose();
+    _seekPreview.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => PlayerLyricsSection(
+    metadata: _metadata,
+    seekPreview: _seekPreview,
+    colorScheme: Theme.of(context).colorScheme,
+    isActive: true,
+  );
 }

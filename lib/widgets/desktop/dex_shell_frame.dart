@@ -1,9 +1,13 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mornye/providers/music_player_provider.dart';
 import 'package:mornye/services/shell_navigation_service.dart';
 import 'package:mornye/theme/dex_gothic.dart';
+import 'package:mornye/widgets/dex/dex_record_rack.dart';
 import 'package:mornye/widgets/desktop/desktop_navigation.dart';
+import 'package:mornye/widgets/desktop/dex_now_playing_card.dart';
 
 /// Whether desktop windows use the floating glass frame (scene, rounded
 /// panel, pill navigation and icon rail) instead of the sidebar layouts.
@@ -119,7 +123,7 @@ class DexShellFrame extends StatelessWidget {
                   },
                 ),
               ),
-              ?player,
+              if (player != null) _BottomDock(playerBar: player),
             ],
           ),
         ],
@@ -455,4 +459,24 @@ class _RailButton extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// The strip under the panel: the record rack while a queue is loaded and the
+/// window is wide enough for the now-playing card (which then carries volume,
+/// mini player and downloads), otherwise the classic player bar.
+class _BottomDock extends ConsumerWidget {
+  const _BottomDock({required this.playerBar});
+
+  final Widget playerBar;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final queue = ref.watch(playQueueProvider).value;
+    final size = MediaQuery.sizeOf(context);
+    final rack =
+        (queue?.isNotEmpty ?? false) &&
+        size.width >= dexNowPlayingCardBreakpoint;
+    if (!rack) return playerBar;
+    return DexRecordRack(height: (size.height * 0.28).clamp(190.0, 250.0));
+  }
 }
