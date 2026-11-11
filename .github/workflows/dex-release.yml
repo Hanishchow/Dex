@@ -158,9 +158,11 @@ jobs:
           test -x "$bundle/lib/ffmpeg/ffmpeg"
           export MORNYE_PACKAGE_ARCH=x86_64
           mkdir -p out
-          bash scripts/package_linux.sh appimage "$bundle" "$TAG" \
+          # The packager wants a plain version such as v1.0.0.
+          VER="${TAG#dex-}"
+          bash scripts/package_linux.sh appimage "$bundle" "$VER" \
             "out/Dex-${TAG}-linux-x86_64.AppImage"
-          bash scripts/package_linux.sh deb "$bundle" "$TAG" \
+          bash scripts/package_linux.sh deb "$bundle" "$VER" \
             "out/Dex-${TAG}-linux-amd64.deb"
           file "out/Dex-${TAG}-linux-x86_64.AppImage"
 
