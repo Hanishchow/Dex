@@ -477,6 +477,20 @@ class _BottomDock extends ConsumerWidget {
         (queue?.isNotEmpty ?? false) &&
         size.width >= dexNowPlayingCardBreakpoint;
     if (!rack) return playerBar;
-    return DexRecordRack(height: (size.height * 0.28).clamp(190.0, 250.0));
+    return ValueListenableBuilder<bool>(
+      valueListenable: dexRackHidden,
+      builder: (context, hidden, _) => hidden
+          ? SizedBox(
+              height: 46,
+              child: Center(
+                child: DexRackChip(
+                  icon: Icons.album,
+                  label: 'Show records',
+                  onTap: () => dexRackHidden.value = false,
+                ),
+              ),
+            )
+          : DexRecordRack(height: (size.height * 0.28).clamp(190.0, 250.0)),
+    );
   }
 }

@@ -1,0 +1,229 @@
+name: Dex release
+
+# Builds the Windows and Linux desktop apps and publishes them as one GitHub
+# release. Push a tag such as dex-v1.0.0 to run it, or start it by hand.
+on:
+  push:
+    tags:
+      - "dex-v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag (e.g., dex-v1.0.0)"
+        required: true
+        default: "dex-v1.0.0"
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.v.outputs.tag }}
+    steps:
+      - id: v
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "tag=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+
+  windows:
+    name: Windows (x64)
+    runs-on: windows-2022
+    needs: version
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Activate pinned Rust toolchain
+        working-directory: rust_backend
+        run: rustup show
+
+      - name: Build Rust desktop library
+        run: ./scripts/build_rust_backend_windows.ps1 -Target x86_64-pc-windows-msvc
+
+      # Git Bash provides curl, unzip and sha256sum for the fetch script.
+      - name: Fetch LGPL FFmpeg
+        shell: bash
+        run: bash scripts/fetch_desktop_ffmpeg.sh windows-x64
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: "stable"
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Prepare Flutter framework patch
+        run: dart scripts/prepare_flutter_sdk.dart
+
+      - name: Build Windows app
+        run: |
+          $commit = git rev-parse --short=8 HEAD
+          flutter build windows --release --target lib/main.dart --dart-define="GIT_COMMIT=$commit"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./scripts/check_windows_bundle.ps1 -BundleDir 'build\windows\x64\runner\Release' -Arch x64
+
+      - name: Zip the portable app
+        env:
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          New-Item -ItemType Directory -Force -Path out | Out-Null
+          Compress-Archive -Path 'build\windows\x64\runner\Release\*' `
+            -DestinationPath "out\Dex-$env:TAG-windows-x64.zip"
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dex-windows
+          if-no-files-found: error
+          path: out/Dex-*.zip
+
+  linux:
+    name: Linux (x86_64)
+    runs-on: ubuntu-22.04
+    needs: version
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          # The image's libunwind-14-dev blocks GStreamer's libunwind-dev
+          # dependency; asking for it first lets apt replace the LLVM one.
+          sudo apt-get install -y libunwind-dev
+          sudo apt-get install -y \
+            clang cmake ninja-build pkg-config zip file \
+            libgtk-3-dev liblzma-dev libsecret-1-dev libstdc++-12-dev \
+            libjson-glib-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+            libasound2-dev libclang-dev \
+            desktop-file-utils appstream dpkg-dev
+
+      - name: Install rustup
+        run: |
+          if ! command -v rustup >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
+              sh -s -- -y --profile minimal --default-toolchain none
+            echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          fi
+
+      - name: Activate pinned Rust toolchain
+        working-directory: rust_backend
+        run: rustup show
+
+      - name: Build Rust desktop library
+        run: bash scripts/build_rust_backend.sh desktop
+
+      - name: Fetch LGPL FFmpeg
+        run: bash scripts/fetch_desktop_ffmpeg.sh linux-x64
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: "stable"
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Prepare Flutter framework patch
+        run: dart scripts/prepare_flutter_sdk.dart
+
+      - name: Build Linux bundle
+        run: |
+          flutter build linux --release --target lib/main.dart \
+            --dart-define="GIT_COMMIT=$(git rev-parse --short=8 HEAD)"
+
+      - name: Package AppImage and deb
+        env:
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          bundle="build/linux/x64/release/bundle"
+          test -x "$bundle/mornye"
+          test -s "$bundle/lib/libmornye_desktop.so"
+          test -x "$bundle/lib/ffmpeg/ffmpeg"
+          export MORNYE_PACKAGE_ARCH=x86_64
+          mkdir -p out
+          bash scripts/package_linux.sh appimage "$bundle" "$TAG" \
+            "out/Dex-${TAG}-linux-x86_64.AppImage"
+          bash scripts/package_linux.sh deb "$bundle" "$TAG" \
+            "out/Dex-${TAG}-linux-amd64.deb"
+          file "out/Dex-${TAG}-linux-x86_64.AppImage"
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dex-linux
+          if-no-files-found: error
+          path: |
+            out/Dex-*.AppImage
+            out/Dex-*.deb
+
+  release:
+    name: Publish release
+    runs-on: ubuntu-latest
+    needs: [version, windows, linux]
+    permissions:
+      contents: write
+    steps:
+      - name: Download Windows build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dex-windows
+          path: release
+
+      - name: Download Linux build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dex-linux
+          path: release
+
+      - name: Write release notes
+        env:
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          (cd release && sha256sum Dex-* > SHA256SUMS.txt)
+          cat > notes.md <<NOTES
+          ## Dex ${TAG}
+
+          A black-and-white gothic desktop music player, built on
+          [Mornye](https://github.com/mornyeapp/Mornye) (LGPL-3.0).
+
+          ### Windows
+          Download \`Dex-${TAG}-windows-x64.zip\`, unzip it anywhere and run \`dex.exe\`.
+          Windows may warn about an unknown publisher because the app is not signed:
+          choose **More info**, then **Run anyway**.
+
+          ### Linux
+          - **AppImage**: download \`Dex-${TAG}-linux-x86_64.AppImage\`, then
+            \`chmod +x Dex-*.AppImage && ./Dex-*.AppImage\`
+          - **Debian/Ubuntu**: \`sudo apt install ./Dex-${TAG}-linux-amd64.deb\`
+
+          \`SHA256SUMS.txt\` lists the checksum of every file.
+          NOTES
+
+      - name: Create release
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: Dex ${{ needs.version.outputs.tag }}
+          body_path: notes.md
+          files: release/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

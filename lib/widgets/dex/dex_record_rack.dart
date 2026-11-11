@@ -13,6 +13,10 @@ const _bone = Color(0xFFF2F2F2);
 const _ink = Color(0xFF0A0A0A);
 const _muted = Color(0xFF9A9A9E);
 
+/// Whether the record rack is folded away; the bottom strip then offers a
+/// "Show records" button instead.
+final dexRackHidden = ValueNotifier<bool>(false);
+
 double _smooth(double x) {
   final t = x.clamp(0.0, 1.0);
   return t * t * (3 - 2 * t);
@@ -357,6 +361,15 @@ class _DexRecordRackState extends ConsumerState<DexRecordRack>
                 ),
               ),
               Positioned(
+                right: 20,
+                top: 12,
+                child: DexRackChip(
+                  icon: Icons.keyboard_arrow_down,
+                  label: 'Hide records',
+                  onTap: () => dexRackHidden.value = true,
+                ),
+              ),
+              Positioned(
                 left: 0,
                 right: 0,
                 bottom: 6,
@@ -635,3 +648,46 @@ class _Arrow extends StatelessWidget {
 // Keep the ink constant referenced for future label chips.
 // ignore: unused_element
 const _unused = _ink;
+
+/// A small pill button used to hide and show the rack.
+class DexRackChip extends StatelessWidget {
+  const DexRackChip({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: const Color(0xFF2E2E31),
+    shape: const StadiumBorder(),
+    child: InkWell(
+      customBorder: const StadiumBorder(),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: _bone),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                letterSpacing: 0.4,
+                fontWeight: FontWeight.w600,
+                color: _bone,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}

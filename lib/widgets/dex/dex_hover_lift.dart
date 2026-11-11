@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 /// like physical cards.
 ///
 /// Rest the pointer on a tile for [peekDelay] and it rises further above its
-/// neighbours: a copy is shown in the overlay, scaled up over the other
+/// neighbours: a copy is shown in the root overlay, scaled up over the other
 /// tiles, while the original stays put under the pointer. Touch and
 /// reduced-motion users get no movement.
 class DexHoverLift extends StatefulWidget {
@@ -42,7 +42,7 @@ class DexHoverLift extends StatefulWidget {
 
 class _DexHoverLiftState extends State<DexHoverLift> {
   final _link = LayerLink();
-  final _portal = OverlayPortalController();
+  OverlayEntry? _entry;
   Timer? _timer;
   bool _hovered = false;
   bool _peek = false;
@@ -51,7 +51,16 @@ class _DexHoverLiftState extends State<DexHoverLift> {
   @override
   void dispose() {
     _timer?.cancel();
+    _removeEntry();
     super.dispose();
+  }
+
+  void _removeEntry() {
+    final entry = _entry;
+    if (entry == null) return;
+    _entry = null;
+    entry.remove();
+    entry.dispose();
   }
 
   void _enter() {
@@ -64,7 +73,7 @@ class _DexHoverLiftState extends State<DexHoverLift> {
   void _exit() {
     _timer?.cancel();
     if (!_hovered && !_peek) return;
-    if (_peek) _portal.hide();
+    _removeEntry();
     setState(() {
       _hovered = false;
       _peek = false;
@@ -76,7 +85,12 @@ class _DexHoverLiftState extends State<DexHoverLift> {
     final box = context.findRenderObject();
     if (box is! RenderBox || !box.hasSize) return;
     _size = box.size;
-    _portal.show();
+    // A plain entry in the root overlay: unlike OverlayPortal it does not
+    // inherit parent-data widgets (such as a list's keep-alive) from above.
+    final themed = InheritedTheme.captureAll(context, widget.child);
+    final entry = OverlayEntry(builder: (_) => _overlayCopy(themed));
+    Overlay.of(context, rootOverlay: true).insert(entry);
+    _entry = entry;
     setState(() => _peek = true);
   }
 
@@ -95,23 +109,19 @@ class _DexHoverLiftState extends State<DexHoverLift> {
   );
 
   /// The enlarged copy that floats over the neighbouring tiles.
-  Widget _overlayCopy(BuildContext context) => CompositedTransformFollower(
-    link: _link,
-    showWhenUnlinked: false,
-    child: IgnorePointer(
-      child: OverflowBox(
-        alignment: Alignment.topLeft,
-        minWidth: _size.width,
-        maxWidth: _size.width,
-        minHeight: _size.height,
-        maxHeight: _size.height,
+  Widget _overlayCopy(Widget child) => Positioned(
+    left: 0,
+    top: 0,
+    child: CompositedTransformFollower(
+      link: _link,
+      showWhenUnlinked: false,
+      child: IgnorePointer(
         child: TweenAnimationBuilder<double>(
           tween: Tween(begin: 0, end: 1),
           duration: const Duration(milliseconds: 380),
           curve: Curves.easeOutBack,
-          builder: (context, t, child) {
-            final from = 1 + (widget.scale - 1);
-            final scale = from + (widget.peekScale - from) * t;
+          builder: (context, t, inner) {
+            final scale = widget.scale + (widget.peekScale - widget.scale) * t;
             final rise = widget.lift + 14 * t;
             return Transform.translate(
               offset: Offset(0, -rise),
@@ -124,14 +134,14 @@ class _DexHoverLiftState extends State<DexHoverLift> {
                     child: SizedBox(
                       width: _size.width,
                       height: _size.height,
-                      child: child,
+                      child: inner,
                     ),
                   ),
                 ),
               ),
             );
           },
-          child: widget.child,
+          child: child,
         ),
       ),
     ),
@@ -146,70 +156,46 @@ class _DexHoverLiftState extends State<DexHoverLift> {
       onExit: (_) => _exit(),
       child: CompositedTransformTarget(
         link: _link,
-        child: OverlayPortal(
-          controller: _portal,
-          overlayChildBuilder: _overlayCopy,
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(end: _hovered ? 1.0 : 0.0),
-            duration: Duration(milliseconds: _hovered ? 260 : 180),
-            curve: _hovered ? Curves.easeOutBack : Curves.easeOutCubic,
-            builder: (context, t, child) => Opacity(
-              // The overlay copy takes over while the tile is peeking.
-              opacity: _peek ? 0 : 1,
-              child: Transform.translate(
-                offset: Offset(0, -widget.lift * t),
-                child: Transform.scale(
-                  scale: 1 + (widget.scale - 1) * t,
-                  child: _decorated(t, child!),
-                ),
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(end: _hovered ? 1.0 : 0.0),
+          duration: Duration(milliseconds: _hovered ? 260 : 180),
+          curve: _hovered ? Curves.easeOutBack : Curves.easeOutCubic,
+          builder: (context, t, child) => Opacity(
+            // The overlay copy takes over while the tile is peeking.
+            opacity: _peek ? 0 : 1,
+            child: Transform.translate(
+              offset: Offset(0, -widget.lift * t),
+              child: Transform.scale(
+                scale: 1 + (widget.scale - 1) * t,
+                child: _decorated(t, child!),
               ),
             ),
-            child: widget.child,
           ),
+          child: widget.child,
         ),
       ),
     );
   }
 }
 
-/// A [SliverChildDelegate] that gives every child [DexHoverLift].
-class DexLiftDelegate extends SliverChildDelegate {
-  const DexLiftDelegate(this.inner);
-
-  final SliverChildDelegate inner;
-
-  @override
-  Widget? build(BuildContext context, int index) {
-    final child = inner.build(context, index);
-    if (child == null) return null;
-    final key = child.key;
-    return DexHoverLift(key: key is GlobalKey ? null : key, child: child);
-  }
-
-  @override
-  int? get estimatedChildCount => inner.estimatedChildCount;
-
-  @override
-  double? estimateMaxScrollOffset(
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
-  ) => inner.estimateMaxScrollOffset(
-    firstIndex,
-    lastIndex,
-    leadingScrollOffset,
-    trailingScrollOffset,
+/// Gives every child of a builder [delegate] [DexHoverLift]. The lift goes
+/// inside the keep-alive and semantics wrappers the delegate adds, so the
+/// sliver still finds its parent data where it expects it. Other delegates
+/// are returned unchanged.
+SliverChildDelegate dexLiftDelegate(SliverChildDelegate delegate) {
+  if (delegate is! SliverChildBuilderDelegate) return delegate;
+  final builder = delegate.builder;
+  return SliverChildBuilderDelegate(
+    (context, index) {
+      final child = builder(context, index);
+      return child == null ? null : DexHoverLift(child: child);
+    },
+    childCount: delegate.childCount,
+    findChildIndexCallback: delegate.findChildIndexCallback,
+    addAutomaticKeepAlives: delegate.addAutomaticKeepAlives,
+    addRepaintBoundaries: delegate.addRepaintBoundaries,
+    addSemanticIndexes: delegate.addSemanticIndexes,
+    semanticIndexCallback: delegate.semanticIndexCallback,
+    semanticIndexOffset: delegate.semanticIndexOffset,
   );
-
-  @override
-  void didFinishLayout(int firstIndex, int lastIndex) =>
-      inner.didFinishLayout(firstIndex, lastIndex);
-
-  @override
-  int? findIndexByKey(Key key) => inner.findIndexByKey(key);
-
-  @override
-  bool shouldRebuild(covariant DexLiftDelegate oldDelegate) =>
-      inner.shouldRebuild(oldDelegate.inner);
 }

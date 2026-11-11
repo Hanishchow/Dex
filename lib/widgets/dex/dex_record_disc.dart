@@ -29,10 +29,10 @@ class _DexRecordDiscState extends State<DexRecordDisc>
   @override
   void initState() {
     super.initState();
-    // 33 rpm is one turn every 1.8 s.
+    // A slow, lazy turn: one revolution every 3.6 s.
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 3600),
     );
     if (widget.spinning) _controller.repeat();
   }

@@ -160,7 +160,7 @@ class _DexNowPlayingCardState extends ConsumerState<DexNowPlayingCard> {
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 14, color: _muted),
               ),
-              const Spacer(),
+              const Expanded(flex: 2, child: _LyricsBand()),
               _Progress(item: item),
               const SizedBox(height: 10),
               const _TransportRow(),
@@ -488,5 +488,34 @@ class _CardLyricsState extends ConsumerState<_CardLyrics> {
     seekPreview: _seekPreview,
     colorScheme: Theme.of(context).colorScheme,
     isActive: true,
+  );
+}
+
+/// The live lyrics in the gap between the artist and the progress bar. The
+/// view scrolls to the current line; its edges fade out. It hides itself when
+/// the card is too short to show a line.
+class _LyricsBand extends StatelessWidget {
+  const _LyricsBand();
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      if (constraints.maxHeight < 64) return const SizedBox.shrink();
+      return ShaderMask(
+        blendMode: BlendMode.dstIn,
+        shaderCallback: (rect) => const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0x00FFFFFF),
+            Color(0xFFFFFFFF),
+            Color(0xFFFFFFFF),
+            Color(0x00FFFFFF),
+          ],
+          stops: [0.0, 0.18, 0.82, 1.0],
+        ).createShader(rect),
+        child: const ClipRect(child: _CardLyrics()),
+      );
+    },
   );
 }

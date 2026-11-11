@@ -114,6 +114,6 @@ class _AnimatedLibrarySliverGridState extends State<AnimatedLibrarySliverGrid>
       crossAxisSpacing: widget.crossAxisSpacing,
       childAspectRatio: widget.childAspectRatio,
     ),
-    delegate: DexLiftDelegate(widget.delegate),
+    delegate: dexLiftDelegate(widget.delegate),
   );
 }
