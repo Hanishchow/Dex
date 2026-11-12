@@ -119,6 +119,29 @@ class _DiscPainter extends CustomPainter {
         ).createShader(rect),
     );
 
+    // Y2K holographic wedges: pink, cyan, lime, gold and violet bands that
+    // sweep round with the disc, like a CD catching the light.
+    canvas.drawCircle(
+      c,
+      r,
+      Paint()
+        ..shader = const SweepGradient(
+          colors: [
+            Color(0x00FFFFFF),
+            Color(0x99FF5FD2),
+            Color(0x9973E6FF),
+            Color(0x99C8FF7A),
+            Color(0x99FFE066),
+            Color(0x999B6BFF),
+            Color(0x00FFFFFF),
+            Color(0x00FFFFFF),
+            Color(0x88FF8FB8),
+            Color(0x8878D8FF),
+            Color(0x00FFFFFF),
+          ],
+        ).createShader(rect),
+    );
+
     // Cool-to-warm fringe at the edge, as in the reference photos.
     canvas.drawCircle(
       c,
@@ -150,6 +173,16 @@ class _DiscPainter extends CustomPainter {
           ..color = dark ? const Color(0x22000000) : const Color(0x14FFFFFF),
       );
     }
+
+    // Frosted clear-plastic hub ring around the label.
+    canvas.drawCircle(
+      c,
+      r * 0.27,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = r * 0.085
+        ..color = const Color(0x55FFFFFF),
+    );
 
     // Raised label ring and bevelled outer edge.
     canvas.drawCircle(

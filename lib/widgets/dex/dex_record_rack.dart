@@ -369,10 +369,23 @@ class _DexRecordRackState extends ConsumerState<DexRecordRack>
                   onTap: () => dexRackHidden.value = true,
                 ),
               ),
+              if (_n > 1)
+                Positioned(
+                  left: 90,
+                  right: 90,
+                  bottom: 2,
+                  height: 14,
+                  child: _QueueLine(
+                    count: _n,
+                    focused: focusedIndex,
+                    current: _current,
+                    onSelect: (i) => _moveTarget(i.toDouble()),
+                  ),
+                ),
               Positioned(
                 left: 0,
                 right: 0,
-                bottom: 6,
+                bottom: 16,
                 height: 54,
                 child: _Caption(
                   item: focusedItem,
@@ -690,4 +703,107 @@ class DexRackChip extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// A thin line with one dot per queued track: the playing track is ringed,
+/// the focused one is large, and the stretch already played is bright.
+/// Tap a dot to bring that record forward.
+class _QueueLine extends StatelessWidget {
+  const _QueueLine({
+    required this.count,
+    required this.focused,
+    required this.current,
+    required this.onSelect,
+  });
+
+  final int count;
+  final int focused;
+  final int current;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final width = constraints.maxWidth;
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapUp: (d) {
+          final f = (d.localPosition.dx / width).clamp(0.0, 1.0);
+          onSelect((f * (count - 1)).round());
+        },
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: CustomPaint(
+            size: Size(width, constraints.maxHeight),
+            painter: _QueueLinePainter(
+              count: count,
+              focused: focused,
+              current: current,
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _QueueLinePainter extends CustomPainter {
+  const _QueueLinePainter({
+    required this.count,
+    required this.focused,
+    required this.current,
+  });
+
+  final int count;
+  final int focused;
+  final int current;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final y = size.height / 2;
+    double x(int i) =>
+        count == 1 ? size.width / 2 : size.width * i / (count - 1);
+    final base = Paint()
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round
+      ..color = const Color(0x33FFFFFF);
+    canvas.drawLine(Offset(0, y), Offset(size.width, y), base);
+    if (current >= 0) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(x(current), y),
+        base..color = const Color(0xCCF2F2F2),
+      );
+    }
+    // Many tracks: skip dots so they never touch.
+    final step = (count * 9 / size.width).ceil().clamp(1, 1000);
+    for (var i = 0; i < count; i++) {
+      final isFocus = i == focused;
+      final isCurrent = i == current;
+      if (!isFocus && !isCurrent && i % step != 0) continue;
+      final played = current >= 0 && i <= current;
+      canvas.drawCircle(
+        Offset(x(i), y),
+        isFocus ? 5 : (isCurrent ? 4 : 2.5),
+        Paint()
+          ..color = isFocus || played
+              ? const Color(0xFFF2F2F2)
+              : const Color(0x66FFFFFF),
+      );
+      if (isCurrent) {
+        canvas.drawCircle(
+          Offset(x(i), y),
+          7.5,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.2
+            ..color = const Color(0xCCF2F2F2),
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_QueueLinePainter old) =>
+      old.count != count || old.focused != focused || old.current != current;
 }
