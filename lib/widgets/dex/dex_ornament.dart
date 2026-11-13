@@ -187,70 +187,78 @@ class DexOrnament extends StatelessWidget {
         final period = energyAware ? 7.0 : 9.0;
         return IgnorePointer(
           child: ExcludeSemantics(
-            child: ListenableBuilder(
-              listenable: DexMotionField.frame,
-              builder: (context, _) {
-                final t = DexMotionField.time + phase * period;
-                final k = level == DexArtworkLevel.subtle ? 0.5 : 1.0;
-                final e = energyAware ? 0.2 + 0.8 * DexMotionField.energy : 1.0;
-                final speed = energyAware
-                    ? 1 + 0.9 * DexMotionField.energy
-                    : 1.0;
-                final wave = math.sin(t * speed * 2 * math.pi / period);
-                final p = DexMotionField.pointer;
-                final scale = 1 + breathe * k * e * 0.04 * wave;
-                final angle =
-                    sway * k * math.sin(t * 2 * math.pi / (period * 1.7) + 1.3);
-                final o = (base * (1 + breathe * k * e * 0.4 * wave)).clamp(
-                  0.0,
-                  1.0,
-                );
-                Widget content = still;
-                // A band of light sweeps across for a moment now and then.
-                if (shimmer) {
-                  final u = ((t + phase * 5) % _shimmerEvery) / _shimmerFor;
-                  if (u >= 0 && u < 1) {
-                    final c = -0.25 + 1.5 * u;
-                    content = Stack(
-                      fit: StackFit.passthrough,
-                      children: [
-                        still,
-                        ShaderMask(
-                          blendMode: BlendMode.dstIn,
-                          shaderCallback: (rect) => LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: const [
-                              Color(0x00FFFFFF),
-                              Color(0xFFFFFFFF),
-                              Color(0x00FFFFFF),
-                            ],
-                            stops: [
-                              (c - 0.14).clamp(0.0, 1.0),
-                              c.clamp(0.0, 1.0),
-                              (c + 0.14).clamp(0.0, 1.0),
-                            ],
-                          ).createShader(rect),
-                          child: Opacity(opacity: 0.9, child: still),
-                        ),
-                      ],
-                    );
+            // Its own layer: the transform changes every tick and must not
+            // mark the page behind it dirty.
+            child: RepaintBoundary(
+              child: ListenableBuilder(
+                listenable: DexMotionField.frame,
+                builder: (context, _) {
+                  final t = DexMotionField.time + phase * period;
+                  final k = level == DexArtworkLevel.subtle ? 0.5 : 1.0;
+                  final e = energyAware
+                      ? 0.2 + 0.8 * DexMotionField.energy
+                      : 1.0;
+                  final speed = energyAware
+                      ? 1 + 0.9 * DexMotionField.energy
+                      : 1.0;
+                  final wave = math.sin(t * speed * 2 * math.pi / period);
+                  final p = DexMotionField.pointer;
+                  final scale = 1 + breathe * k * e * 0.04 * wave;
+                  final angle =
+                      sway *
+                      k *
+                      math.sin(t * 2 * math.pi / (period * 1.7) + 1.3);
+                  final o = (base * (1 + breathe * k * e * 0.4 * wave)).clamp(
+                    0.0,
+                    1.0,
+                  );
+                  Widget content = still;
+                  // A band of light sweeps across for a moment now and then.
+                  if (shimmer) {
+                    final u = ((t + phase * 5) % _shimmerEvery) / _shimmerFor;
+                    if (u >= 0 && u < 1) {
+                      final c = -0.25 + 1.5 * u;
+                      content = Stack(
+                        fit: StackFit.passthrough,
+                        children: [
+                          still,
+                          ShaderMask(
+                            blendMode: BlendMode.dstIn,
+                            shaderCallback: (rect) => LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: const [
+                                Color(0x00FFFFFF),
+                                Color(0xFFFFFFFF),
+                                Color(0x00FFFFFF),
+                              ],
+                              stops: [
+                                (c - 0.14).clamp(0.0, 1.0),
+                                c.clamp(0.0, 1.0),
+                                (c + 0.14).clamp(0.0, 1.0),
+                              ],
+                            ).createShader(rect),
+                            child: Opacity(opacity: 0.9, child: still),
+                          ),
+                        ],
+                      );
+                    }
                   }
-                }
-                return Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.identity()
-                    ..translateByDouble(
-                      p.dx * depth * k,
-                      p.dy * depth * k,
-                      0,
-                      1,
-                    )
-                    ..rotateZ(angle)
-                    ..scaleByDouble(scale, scale, 1, 1),
-                  child: Opacity(opacity: o, child: content),
-                );
-              },
+                  return Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()
+                      ..translateByDouble(
+                        p.dx * depth * k,
+                        p.dy * depth * k,
+                        0,
+                        1,
+                      )
+                      ..rotateZ(angle)
+                      ..scaleByDouble(scale, scale, 1, 1),
+                    child: Opacity(opacity: o, child: content),
+                  );
+                },
+              ),
             ),
           ),
         );
@@ -277,7 +285,7 @@ class _DexGothicBackdropState extends State<DexGothicBackdrop> {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox.expand(
+    return SizedBox.expand(
       child: Stack(
         fit: StackFit.expand,
         children: [

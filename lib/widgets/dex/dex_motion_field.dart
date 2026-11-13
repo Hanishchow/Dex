@@ -51,6 +51,8 @@ class _DexMotionHostState extends ConsumerState<DexMotionHost>
   // vsync, so the whole window (blurs included) was re-rendered 60 times a
   // second. The timer produces a frame only when it fires.
   Timer? _timer;
+  int _periodMs = 0;
+  bool _wasPlaying = false;
   final Stopwatch _clock = Stopwatch();
   Duration _last = Duration.zero;
   bool _focused = true;
@@ -89,10 +91,19 @@ class _DexMotionHostState extends ConsumerState<DexMotionHost>
   void _sync() {
     final run =
         _focused && !_reduced && DexArt.level.value != DexArtworkLevel.off;
+    // Every tick costs a full frame of the window (about 20 ms of CPU), so the
+    // ambient drift ticks four times a second while idle and eight times a
+    // second only while music plays and the star on the slider twinkles.
+    final period = DexMotionField._playing ? 125 : 250;
+    if (run && _timer != null && period != _periodMs) {
+      _timer!.cancel();
+      _timer = null;
+    }
     if (run && _timer == null) {
+      _periodMs = period;
       _clock.start();
       _timer = Timer.periodic(
-        const Duration(milliseconds: 100),
+        Duration(milliseconds: period),
         (_) => _onTick(_clock.elapsed),
       );
     } else if (!run && _timer != null) {
@@ -139,6 +150,12 @@ class _DexMotionHostState extends ConsumerState<DexMotionHost>
   @override
   Widget build(BuildContext context) {
     DexMotionField._playing = ref.watch(playbackPlayingProvider);
+    if (DexMotionField._playing != _wasPlaying) {
+      _wasPlaying = DexMotionField._playing;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _sync();
+      });
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         DexMotionField.size = constraints.biggest;

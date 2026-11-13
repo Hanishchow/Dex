@@ -97,13 +97,15 @@ class _DexHoverLiftState extends State<DexHoverLift> {
   Widget _decorated(double t, Widget child) => DecoratedBox(
     decoration: BoxDecoration(
       borderRadius: widget.borderRadius,
-      boxShadow: [
-        BoxShadow(
-          color: Color.fromRGBO(0, 0, 0, 0.55 * t.clamp(0.0, 1.0)),
-          blurRadius: 22 * t.clamp(0.0, 1.0),
-          offset: Offset(0, 12 * t.clamp(0.0, 1.0)),
-        ),
-      ],
+      boxShadow: t <= 0
+          ? null
+          : [
+              BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, 0.55 * t.clamp(0.0, 1.0)),
+                blurRadius: 22 * t.clamp(0.0, 1.0),
+                offset: Offset(0, 12 * t.clamp(0.0, 1.0)),
+              ),
+            ],
     ),
     child: child,
   );

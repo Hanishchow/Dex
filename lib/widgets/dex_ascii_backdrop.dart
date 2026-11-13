@@ -161,16 +161,11 @@ class _DexAsciiBackdropState extends State<DexAsciiBackdrop> {
   }
 
   void _sync() {
+    // The plate used to shimmer by re-laying out the whole text block every
+    // 150 ms, which kept a core busy while the app sat idle. It is drawn once
+    // now and only changes when the calm state does.
     _timer?.cancel();
     _timer = null;
-    final still =
-        DexAmbient.calm.value || MediaQuery.disableAnimationsOf(context);
-    if (!still) {
-      _timer = Timer.periodic(
-        const Duration(milliseconds: 150),
-        (_) => _tick.value++,
-      );
-    }
     if (mounted) setState(() {});
   }
 

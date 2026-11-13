@@ -111,6 +111,10 @@ class DexMotionRepaint extends SingleChildRenderObjectWidget {
 }
 
 class _RenderMotionRepaint extends RenderProxyBox {
+  // Repaints on every tick, so it must not dirty the page it sits in.
+  @override
+  bool get isRepaintBoundary => true;
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
